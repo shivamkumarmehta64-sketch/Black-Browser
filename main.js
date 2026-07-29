@@ -41,7 +41,7 @@ app.whenReady().then(async () => {
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       webviewTag: true,
-      contextIsolation: true,
+      contextIsolation: false,
       nodeIntegration: false
     }
   });

@@ -13,7 +13,7 @@
   "build": {
     "appId": "com.blacknoir.browser",
     "productName": "Black Noir",
-    "win": { "target": ["portable"] },
+    "win": { "target": ["portable"], "sign": false },
     "extraResources": [{ "from": "../ublock/uBlock0.chromium", "to": "ublock" }]
   }
 }
