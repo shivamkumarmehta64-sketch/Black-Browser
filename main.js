@@ -23,6 +23,7 @@ const adDomains = [
 ];
 
 let mainWindow;
+let blockedCount = 0;
 
 function loadConfig() {
   try { return JSON.parse(fs.readFileSync(configPath, 'utf8')); } catch (e) { return {}; }
@@ -33,7 +34,7 @@ function saveConfig(cfg) {
 
 app.whenReady().then(async () => {
   const filter = { urls: adDomains.map(d => '*://*.' + d + '/*') };
-  session.defaultSession.webRequest.onBeforeRequest(filter, (d, c) => c({ cancel: true }));
+  session.defaultSession.webRequest.onBeforeRequest(filter, (d, c) => { blockedCount++; if (mainWindow) mainWindow.webContents.executeJavaScript('window._blockedCount=' + blockedCount + ';if(window._updateShield)window._updateShield()'); return c({ cancel: true }); });
   try { await session.defaultSession.loadExtension(ublockPath); } catch (e) {}
   mainWindow = new BrowserWindow({
     width: 1280, height: 800, minWidth: 900, minHeight: 600,
@@ -50,6 +51,7 @@ app.whenReady().then(async () => {
 
 ipcMain.handle('get-config', () => loadConfig());
 ipcMain.handle('set-config', (e, cfg) => { saveConfig(cfg); return true; });
+ipcMain.handle('get-blocked', () => blockedCount);
 
 const allowedSchemes = ['http:', 'https:', 'about:', 'data:', 'file:'];
 ipcMain.handle('navigate', (e, url) => {
