@@ -4,7 +4,8 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "dist": "electron-builder --win portable"
+    "dist": "electron-builder --win nsis",
+    "dist-linux": "electron-builder --linux AppImage"
   },
   "devDependencies": {
     "electron": "^33.0.0",
@@ -13,7 +14,8 @@
   "build": {
     "appId": "com.blacknoir.browser",
     "productName": "Black Noir",
-    "win": { "target": ["portable"], "sign": false },
+    "win": { "target": ["nsis"], "sign": false },
+    "linux": { "target": ["AppImage"], "category": "Network" },
     "extraResources": [{ "from": "../ublock/uBlock0.chromium", "to": "ublock" }]
   }
 }
