@@ -34,7 +34,7 @@ body{font:14px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-se
 #wallpaper-btn{position:fixed;bottom:16px;right:16px;background:rgba(255,255,255,0.06);border:1px solid #3a3a3c;color:#8e8e93;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:15px;transition:all .2s ease;z-index:10;display:flex;align-items:center;justify-content:center}
 #wallpaper-btn:hover{background:rgba(255,255,255,0.12);color:#fff;transform:rotate(30deg)}
 #webview{flex:1;display:none;animation:fadeIn .15s ease}
-#webview.active{display:block}
+#webview.active{display:flex;height:100%}
 .hidden{display:none!important}
 @keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
 </style>
@@ -55,7 +55,7 @@ body{font:14px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-se
   <div id="dials"></div>
   <button id="wallpaper-btn">&#x1F5BC;</button>
 </div>
-<webview id="webview" allowpopups style="height:100%"></webview>
+<webview id="webview" allowpopups></webview>
 <script>
 const $ = s => document.querySelector(s);
 const webview = $('#webview');
@@ -84,7 +84,7 @@ window.api.getConfig().then(cfg => {
   renderDials();
   if (cfg.wallpaper != null) { wpIdx = cfg.wallpaper; setWallpaper(wpIdx); }
   window.api.getBlocked().then(function(n) { window._blockedCount = n || 0; _updateShield(); });
-});
+}).catch(function(){ renderDials(); });
 function setWallpaper(i) {
   wpIdx = i % wallpapers.length;
   ntp.style.setProperty('--bg', 'url(' + wallpapers[wpIdx] + ')');
@@ -152,7 +152,7 @@ document.addEventListener('keydown', function(e) {
   if (e.altKey && e.key === 'ArrowLeft') { e.preventDefault(); webview.goBack(); }
   if (e.altKey && e.key === 'ArrowRight') { e.preventDefault(); webview.goForward(); }
   if (e.key === 'F5') { e.preventDefault(); webview.reload(); }
-  if (e.key === 'F11') { e.preventDefault(); const bv = require('electron').remote || null; if (bv) { const w = bv.getCurrentWindow(); w.setFullScreen(!w.isFullScreen()); } }
+  if (e.key === 'F11') { e.preventDefault(); window.api.toggleFullscreen(); }
   if (e.key === 'Escape') { webview.stop(); }
 });
 

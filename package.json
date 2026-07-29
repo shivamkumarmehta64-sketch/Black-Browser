@@ -1,6 +1,8 @@
 {
   "name": "black-noir",
   "version": "1.0.0",
+  "description": "Minimal Windows WebView2 browser with native adblock-rust engine",
+  "author": "shivamkumarmehta64-sketch",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
@@ -24,6 +26,6 @@
       "artifactName": "${productName}-${version}-portable.${ext}"
     },
     "linux": { "target": ["AppImage"], "category": "Network" },
-    "extraResources": [{ "from": "../ublock/uBlock0.chromium", "to": "ublock" }]
+    "extraResources": [{ "from": "ublock/uBlock0.chromium", "to": "ublock" }]
   }
 }

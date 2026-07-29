@@ -2,9 +2,9 @@ const { app, BrowserWindow, session, ipcMain } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
-const ublockPath = fs.existsSync(path.join(__dirname, '..', 'ublock', 'uBlock0.chromium'))
-  ? path.join(__dirname, '..', 'ublock', 'uBlock0.chromium')
-  : path.join(process.resourcesPath, 'uBlock0.chromium');
+const ublockPath = fs.existsSync(path.join(__dirname, 'ublock', 'uBlock0.chromium'))
+  ? path.join(__dirname, 'ublock', 'uBlock0.chromium')
+  : path.join(process.resourcesPath, 'ublock', 'uBlock0.chromium');
 const configPath = path.join(app.getPath('userData'), 'config.json');
 
 const adDomains = [
@@ -60,4 +60,8 @@ ipcMain.handle('navigate', (e, url) => {
     if (!allowedSchemes.includes(u.protocol)) return 'blocked';
   } catch { return 'invalid'; }
   return 'ok';
+});
+ipcMain.handle('toggle-fullscreen', () => {
+  const w = BrowserWindow.getFocusedWindow();
+  if (w) w.setFullScreen(!w.isFullScreen());
 });
