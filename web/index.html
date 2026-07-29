@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Black Noir</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #0d0d0d;
+  color: #e0e0e0;
+  display: flex; flex-direction: column; align-items: center;
+  min-height: 100vh; user-select: none;
+}
+.content { width: 100%; max-width: 720px; padding: 40px 20px; margin-top: 15vh; }
+.brand { text-align: center; margin-bottom: 32px; }
+.brand h1 { font-size: 28px; font-weight: 700; color: #ffffff; }
+.brand p { font-size: 13px; color: #888; margin-top: 6px; }
+.search-box {
+  display: flex; align-items: center;
+  background: rgba(30,30,30,0.9);
+  border: 1px solid #333; border-radius: 24px;
+  padding: 4px 4px 4px 20px;
+  transition: all 0.2s;
+}
+.search-box:focus-within { border-color: #555; background: rgba(40,40,40,0.95); }
+.search-box input {
+  flex: 1; padding: 12px 0; background: transparent; border: none;
+  color: #e0e0e0; font-size: 15px; outline: none;
+}
+.search-box input::placeholder { color: #666; }
+.search-box button {
+  background: #2a2a2a; border: 1px solid #444; color: #ccc;
+  padding: 8px 22px; border-radius: 20px; cursor: pointer;
+  font-size: 13px;
+}
+.search-box button:hover { background: #333; color: #fff; }
+.shortcuts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 40px; }
+.shortcut {
+  background: rgba(25,25,25,0.85);
+  border: 1px solid #2a2a2a; border-radius: 12px;
+  padding: 20px 12px; cursor: pointer; text-align: center;
+  transition: all 0.2s;
+}
+.shortcut:hover { background: rgba(40,40,40,0.9); border-color: #444; transform: translateY(-2px); }
+.shortcut .icon { font-size: 24px; margin-bottom: 8px; }
+.shortcut .name { font-size: 13px; color: #ccc; font-weight: 500; }
+.shortcut .url { font-size: 11px; color: #666; margin-top: 4px; }
+.footer { text-align: center; font-size: 11px; color: #333; margin-top: 24px; }
+</style>
+</head>
+<body>
+<div class="content">
+  <div class="brand">
+    <h1>Black Noir</h1>
+    <p>Private &amp; ad-free browsing</p>
+  </div>
+  <div class="search-box">
+    <input id="url-input" type="text" placeholder="Search or enter address..." autofocus>
+    <button id="go-btn">Go</button>
+  </div>
+  <div class="shortcuts">
+    <div class="shortcut" data-url="https://www.google.com"><div class="icon">G</div><div class="name">Google</div><div class="url">google.com</div></div>
+    <div class="shortcut" data-url="https://www.youtube.com"><div class="icon">&#9654;</div><div class="name">YouTube</div><div class="url">youtube.com</div></div>
+    <div class="shortcut" data-url="https://www.reddit.com"><div class="icon">R</div><div class="name">Reddit</div><div class="url">reddit.com</div></div>
+    <div class="shortcut" data-url="https://github.com"><div class="icon">GH</div><div class="name">GitHub</div><div class="url">github.com</div></div>
+  </div>
+  <div class="footer">Black Noir</div>
+</div>
+<script>
+const input = document.getElementById('url-input');
+const goBtn = document.getElementById('go-btn');
+function navigate(url) {
+  if (url && !url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
+  if (url) window.location.href = url;
+}
+goBtn.addEventListener('click', () => navigate(input.value));
+input.addEventListener('keydown', e => { if (e.key === 'Enter') navigate(input.value); });
+document.querySelectorAll('.shortcut').forEach(el => {
+  el.addEventListener('click', () => navigate(el.dataset.url));
+});
+document.addEventListener('keydown', e => {
+  if (e.ctrlKey && e.key === 'l') { e.preventDefault(); input.focus(); input.select(); }
+  if (e.ctrlKey && e.key === 'q') { e.preventDefault(); window.chrome?.webview?.postMessage('quit'); }
+});
+</script>
+</body>
+</html>
