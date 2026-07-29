@@ -14,7 +14,9 @@ body{font:14px/1.4 system-ui,sans-serif;background:#0a0000;color:#ddd;display:fl
 #url-bar:focus{border-color:#ff0000;box-shadow:0 0 12px #ff000044}
 #url-bar::placeholder{color:#4a0000}
 #bookmark-btn{font-size:14px}
-#ntp{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;overflow:auto;padding:40px;background:linear-gradient(135deg,rgba(10,0,0,0.92),rgba(30,0,0,0.9),rgba(50,0,0,0.88)),url('bg.jpg') center/cover fixed}
+#ntp{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;overflow:auto;padding:40px;background:linear-gradient(135deg,rgba(10,0,0,0.92),rgba(30,0,0,0.9),rgba(50,0,0,0.88)),var(--bg) center/cover fixed}
+#wallpaper-btn{position:fixed;bottom:16px;right:16px;background:rgba(139,0,0,0.3);border:1px solid #8B0000;color:#ff6666;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:16px;transition:all .3s;z-index:10}
+#wallpaper-btn:hover{background:#8B0000;color:#fff;box-shadow:0 0 15px #ff000066}
 #ntp .logo{width:80px;height:80px;margin-bottom:12px;filter:drop-shadow(0 0 20px #ff000066)}
 #ntp h1{font-size:32px;margin-bottom:4px;color:#ff4444;text-shadow:0 0 20px #ff000066,0 0 40px #8B0000;letter-spacing:4px;font-weight:900}
 #ntp .tagline{color:#8B0000;margin-bottom:30px;font-style:italic;letter-spacing:2px;font-size:13px}
@@ -41,6 +43,7 @@ body{font:14px/1.4 system-ui,sans-serif;background:#0a0000;color:#ddd;display:fl
   <h1>BLACK NOIR</h1>
   <p class="tagline">&#x2620; born in darkness &#x2620;</p>
   <div id="dials"></div>
+  <button id="wallpaper-btn">&#x1F5BC;</button>
 </div>
 <webview id="webview" allowpopups style="height:100%"></webview>
 <script>
@@ -55,6 +58,8 @@ const ntp = $('#ntp');
 let currentUrl = 'about:blank';
 let dials = [];
 
+var wallpapers = ['bg.jpg','bg2.jpg','bg3.jpg'];
+var wpIdx = 0;
 window.api.getConfig().then(cfg => {
   dials = cfg.dials || [
     {url:'https://google.com',label:'Google',icon:'G'},
@@ -63,7 +68,14 @@ window.api.getConfig().then(cfg => {
     {url:'https://reddit.com',label:'Reddit',icon:'R'}
   ];
   renderDials();
+  if (cfg.wallpaper != null) { wpIdx = cfg.wallpaper; setWallpaper(wpIdx); }
 });
+function setWallpaper(i) {
+  wpIdx = i % wallpapers.length;
+  ntp.style.setProperty('--bg', 'url(' + wallpapers[wpIdx] + ')');
+  window.api.getConfig().then(function(cfg) { cfg.wallpaper = wpIdx; window.api.setConfig(cfg); });
+}
+$('#wallpaper-btn').onclick = function() { setWallpaper(wpIdx + 1); };
 
 function renderDials() {
   $('#dials').innerHTML = dials.map(d =>
