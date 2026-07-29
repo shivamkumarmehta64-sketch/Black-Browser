@@ -1,14 +1,19 @@
 {
-  "name": "light-browser",
-  "private": true,
-  "version": "0.1.0",
-  "type": "module",
+  "name": "black-noir",
+  "version": "1.0.0",
+  "main": "main.js",
   "scripts": {
-    "tauri": "tauri",
-    "dev": "tauri dev",
-    "build": "tauri build"
+    "start": "electron .",
+    "dist": "electron-builder --win portable"
   },
   "devDependencies": {
-    "@tauri-apps/cli": "^2.0.0"
+    "electron": "^33.0.0",
+    "electron-builder": "^25.0.0"
+  },
+  "build": {
+    "appId": "com.blacknoir.browser",
+    "productName": "Black Noir",
+    "win": { "target": ["portable"] },
+    "extraResources": [{ "from": "../ublock/uBlock0.chromium", "to": "ublock" }]
   }
 }

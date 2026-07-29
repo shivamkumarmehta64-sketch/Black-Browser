@@ -1,4 +1,6 @@
-target/
-Cargo.lock
+﻿.gitignore
+node_modules/
 dist/
-*.zip
+*.exe
+.DS_Store
+
