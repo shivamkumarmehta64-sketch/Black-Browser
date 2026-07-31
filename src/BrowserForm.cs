@@ -699,6 +699,23 @@ namespace BlackBrowser
                     try { wv.Reload(); } catch { }
                 };
 
+                wv.CoreWebView2.NewWindowRequested += (s, e) =>
+                {
+                    e.Handled = true;
+                    string targetUri = e.Uri;
+                    this.BeginInvoke((Action)(() =>
+                    {
+                        if (!string.IsNullOrWhiteSpace(targetUri) && targetUri != "about:blank")
+                        {
+                            AddNewTab("Loading...", targetUri, isPrivate);
+                        }
+                        else
+                        {
+                            AddNewTab("New Tab", "black://home", isPrivate);
+                        }
+                    }));
+                };
+
                 wv.CoreWebView2.PermissionRequested += (s, e) =>
                 {
                     if (e.PermissionKind == CoreWebView2PermissionKind.Notifications)
