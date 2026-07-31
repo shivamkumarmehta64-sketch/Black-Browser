@@ -131,7 +131,7 @@ namespace BlackBrowser
         public MainForm()
         {
             logPath = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "debug.log");
-            Log("=== Black Browser (Edge Light + Eye Care) starting ===");
+            Log("=== Black Browser (Edge Light + Professional UI) starting ===");
 
             this.Text = "Black (Edge Light Version)";
             this.Width = 1280;
@@ -471,7 +471,7 @@ namespace BlackBrowser
 
             if (url == "about:blank" || string.IsNullOrEmpty(url))
             {
-                wv.CoreWebView2.NavigateToString(GetEdgeLightSpeedDialHTML());
+                wv.CoreWebView2.NavigateToString(GetProfessionalSpeedDialHTML());
             }
             else
             {
@@ -499,7 +499,7 @@ namespace BlackBrowser
                 WebView2 wv = GetCurrentWebView();
                 if (wv != null && wv.CoreWebView2 != null)
                 {
-                    wv.CoreWebView2.NavigateToString(GetEdgeLightSpeedDialHTML());
+                    wv.CoreWebView2.NavigateToString(GetProfessionalSpeedDialHTML());
                     urlBar.Text = "";
                     tabControl.SelectedTab.Text = "New Tab";
                 }
@@ -677,9 +677,9 @@ true;
 ";
         }
 
-        // ─── Edge Light Speed Dial HTML Page ──────────────────────────────────────
+        // ─── Professional Web UI Designer Speed Dial HTML ─────────────────────────
 
-        private string GetEdgeLightSpeedDialHTML()
+        private string GetProfessionalSpeedDialHTML()
         {
             return @"<!DOCTYPE html>
 <html>
@@ -687,34 +687,94 @@ true;
 <meta charset='utf-8'>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,SegoeUI,'Helvetica Neue',Helvetica,Arial,sans-serif;background:#ffffff;color:#202124;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;overflow:hidden;-webkit-font-smoothing:antialiased}
-.logo{font-size:48px;font-weight:700;letter-spacing:-0.5px;margin-bottom:24px;display:flex;align-items:center;gap:12px;color:#0078d4}
-.logo span{color:#107c41;font-weight:400}
-.search-container{width:100%;max-width:600px;margin-bottom:34px}
-.search-box{display:flex;align-items:center;width:100%;height:48px;padding:0 18px;border-radius:24px;background:#f3f3f3;border:1px solid #e1e1e1;box-shadow:0 2px 8px rgba(0,0,0,0.06);transition:box-shadow .2s ease,border-color .2s ease,background .2s ease}
-.search-box:hover,.search-box:focus-within{box-shadow:0 4px 12px rgba(0,120,212,0.18);border-color:#0078d4;background:#ffffff}
-.search-icon{color:#0078d4;font-size:18px;margin-right:12px}
-.search-box input{flex:1;background:transparent;border:none;outline:none;color:#202124;font-size:16px}
-.search-box button{background:#0078d4;border:none;color:#ffffff;font-weight:600;font-size:14px;cursor:pointer;padding:0 18px;border-radius:18px;height:34px}
-.dials{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;width:100%;max-width:600px}
-.dial{display:flex;flex-direction:column;align-items:center;gap:12px;padding:16px;border-radius:12px;cursor:pointer;transition:all .15s ease;text-decoration:none;color:#323130}
-.dial:hover{background:#f3f3f3;transform:translateY(-2px)}
-.dial-icon{width:48px;height:48px;border-radius:12px;background:#f3f3f3;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:bold;color:#0078d4;box-shadow:0 1px 4px rgba(0,0,0,0.08)}
-.dial-label{font-size:12px;color:#323130;font-weight:500;text-align:center}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell,'Helvetica Neue',sans-serif;background:linear-gradient(180deg,#ffffff 0%,#f8f9fa 100%);color:#202124;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:40px 20px;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+
+/* Header Branding */
+.brand{display:flex;align-items:center;gap:14px;margin-bottom:28px;user-select:none;animation:fadeInDown .5s cubic-bezier(0.16,1,0.3,1)}
+.brand-badge{width:52px;height:52px;border-radius:16px;background:linear-gradient(135deg,#0078d4 0%,#107c41 100%);display:flex;align-items:center;justify-content:center;color:#ffffff;font-size:24px;font-weight:800;box-shadow:0 8px 24px rgba(0,120,212,0.25)}
+.brand-title{font-size:36px;font-weight:800;letter-spacing:-0.5px;color:#111827}
+.brand-title span{color:#0078d4;font-weight:400}
+
+/* Stats Pill Dashboard (Brave / Opera GX Inspired) */
+.stats-bar{display:flex;gap:16px;margin-bottom:32px;animation:fadeIn .6s cubic-bezier(0.16,1,0.3,1)}
+.stat-card{background:#ffffff;border:1px solid #e5e7eb;border-radius:14px;padding:12px 20px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 10px rgba(0,0,0,0.03);transition:transform .2s ease,box-shadow .2s ease}
+.stat-card:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,120,212,0.08)}
+.stat-icon{font-size:20px}
+.stat-info{display:flex;flex-direction:column}
+.stat-val{font-size:15px;font-weight:700;color:#111827}
+.stat-lbl{font-size:11px;color:#6b7280;font-weight:500}
+
+/* Search Box (Arc & Edge Pill Design) */
+.search-container{width:100%;max-width:620px;margin-bottom:40px;animation:fadeInUp .5s cubic-bezier(0.16,1,0.3,1)}
+.search-box{display:flex;align-items:center;width:100%;height:52px;padding:0 20px;border-radius:26px;background:#ffffff;border:1.5px solid #e5e7eb;box-shadow:0 4px 20px rgba(0,0,0,0.05);transition:all .25s ease}
+.search-box:hover,.search-box:focus-within{box-shadow:0 6px 28px rgba(0,120,212,0.18);border-color:#0078d4}
+.search-icon{color:#0078d4;font-size:18px;margin-right:14px}
+.search-box input{flex:1;background:transparent;border:none;outline:none;color:#111827;font-size:16px;font-weight:400}
+.search-box input::placeholder{color:#9ca3af}
+.search-box button{background:linear-gradient(135deg,#0078d4 0%,#005a9e 100%);border:none;color:#ffffff;font-weight:600;font-size:14.5px;cursor:pointer;padding:0 22px;border-radius:20px;height:38px;box-shadow:0 2px 8px rgba(0,120,212,0.3);transition:all .15s ease}
+.search-box button:hover{transform:scale(1.02);box-shadow:0 4px 14px rgba(0,120,212,0.4)}
+
+/* Speed Dial Grid (Safari & Chrome Inspired) */
+.dials-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;width:100%;max-width:640px;animation:fadeInUp .6s cubic-bezier(0.16,1,0.3,1)}
+.dial{display:flex;flex-direction:column;align-items:center;gap:12px;padding:18px;border-radius:16px;background:#ffffff;border:1px solid #f3f4f6;cursor:pointer;transition:all .2s ease;text-decoration:none;color:#374151;box-shadow:0 2px 8px rgba(0,0,0,0.02)}
+.dial:hover{background:#ffffff;transform:translateY(-4px) scale(1.02);border-color:#0078d4;box-shadow:0 12px 30px rgba(0,120,212,0.12)}
+.dial-icon{width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;box-shadow:0 2px 6px rgba(0,0,0,0.06);transition:transform .2s ease}
+.dial:hover .dial-icon{transform:scale(1.08)}
+.dial-label{font-size:12.5px;font-weight:600;color:#374151}
+
+/* Footer info */
+.footer-note{margin-top:40px;font-size:12px;color:#9ca3af;font-weight:500;display:flex;align-items:center;gap:16px;animation:fadeIn .7s ease}
+.footer-tag{display:flex;align-items:center;gap:6px}
+
+@keyframes fadeInDown{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
 </style>
 </head>
 <body>
-<div class='logo'>
-  BLACK <span>BROWSER</span>
+
+<!-- Header -->
+<div class='brand'>
+  <div class='brand-badge'>B</div>
+  <div class='brand-title'>BLACK <span>BROWSER</span></div>
 </div>
+
+<!-- Stats Bar (Brave & Opera GX Style) -->
+<div class='stats-bar'>
+  <div class='stat-card'>
+    <div class='stat-icon'>🛡️</div>
+    <div class='stat-info'>
+      <div class='stat-val'>3-Layer Shield</div>
+      <div class='stat-lbl'>Zero Ads & Trackers</div>
+    </div>
+  </div>
+  <div class='stat-card'>
+    <div class='stat-icon'>⚡</div>
+    <div class='stat-info'>
+      <div class='stat-val'>Ultra-Fast</div>
+      <div class='stat-lbl'>Low RAM Engine</div>
+    </div>
+  </div>
+  <div class='stat-card'>
+    <div class='stat-icon'>🧩</div>
+    <div class='stat-info'>
+      <div class='stat-val'>Extensions</div>
+      <div class='stat-lbl'>Chrome & Edge Ready</div>
+    </div>
+  </div>
+</div>
+
+<!-- Search Pill -->
 <form class='search-container' action='https://www.google.com/search' method='get'>
   <div class='search-box'>
     <span class='search-icon'>🔍</span>
-    <input type='text' name='q' placeholder='Search Web or Type a URL' autofocus autocomplete='off'>
+    <input type='text' name='q' placeholder='Search Google or enter web address...' autofocus autocomplete='off'>
     <button type='submit'>Search</button>
   </div>
 </form>
-<div class='dials'>
+
+<!-- Speed Dial Grid -->
+<div class='dials-grid'>
   <a class='dial' href='https://www.google.com'><div class='dial-icon' style='background:#e8f0fe;color:#1a73e8'>G</div><div class='dial-label'>Google</div></a>
   <a class='dial' href='https://www.youtube.com'><div class='dial-icon' style='background:#fce8e6;color:#d93025'>Y</div><div class='dial-label'>YouTube</div></a>
   <a class='dial' href='https://music.youtube.com'><div class='dial-icon' style='background:#fef7e0;color:#f29900'>M</div><div class='dial-label'>YT Music</div></a>
@@ -724,6 +784,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,SegoeUI,'Hel
   <a class='dial' href='https://chatgpt.com'><div class='dial-icon' style='background:#e6f4ea;color:#107c41'>AI</div><div class='dial-label'>ChatGPT</div></a>
   <a class='dial' href='https://chromewebstore.google.com'><div class='dial-icon' style='background:#ebf3fc;color:#0078d4'>🛒</div><div class='dial-label'>Web Store</div></a>
 </div>
+
+<!-- Footer -->
+<div class='footer-note'>
+  <span class='footer-tag'>🔒 Private & Secure</span>
+  <span>•</span>
+  <span class='footer-tag'>👁️ Eye Care Screen Filter Enabled</span>
+  <span>•</span>
+  <span class='footer-tag'>⚡ ~40MB Tray Memory</span>
+</div>
+
 </body>
 </html>";
         }
