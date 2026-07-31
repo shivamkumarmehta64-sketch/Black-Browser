@@ -524,7 +524,11 @@ namespace BlackBrowser
                     Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                     "black-webview2");
 
-                webViewEnv = await CoreWebView2Environment.CreateAsync(null, userDataFolder, null);
+                CoreWebView2EnvironmentOptions options = new CoreWebView2EnvironmentOptions();
+                options.AdditionalBrowserArguments = "--enable-features=msWebView2Extensions --allow-file-access-from-files";
+                try { options.AreBrowserExtensionsEnabled = true; } catch { }
+
+                webViewEnv = await CoreWebView2Environment.CreateAsync(null, userDataFolder, options);
                 Log("Environment created successfully with standard WebView2 environment settings");
 
                 // Launch Home / Speed Dial page in the initial tab
@@ -580,10 +584,31 @@ namespace BlackBrowser
                 {
                     try
                     {
+                        e.Handled = false;
                         string path = e.ResultFilePath;
                         string name = !string.IsNullOrEmpty(path) ? Path.GetFileName(path) : "Download";
                         DownloadsManager.AddDownload(name, path ?? "", 0);
                         ShowSoftCommunication("📥 Download Started: " + name);
+
+                        if (e.DownloadOperation != null)
+                        {
+                            e.DownloadOperation.StateChanged += (ds, de) =>
+                            {
+                                try
+                                {
+                                    if (e.DownloadOperation.State == CoreWebView2DownloadState.Completed)
+                                    {
+                                        ShowSoftCommunication("✅ Download Complete: " + name);
+                                    }
+                                    else if (e.DownloadOperation.State == CoreWebView2DownloadState.Interrupted)
+                                    {
+                                        Log("Download Interrupted: " + name + " Reason: " + e.DownloadOperation.InterruptReason.ToString());
+                                        ShowSoftCommunication("⚠️ Download Interrupted: " + name + " (" + e.DownloadOperation.InterruptReason.ToString() + ")");
+                                    }
+                                }
+                                catch { }
+                            };
+                        }
                     }
                     catch { }
                 };
