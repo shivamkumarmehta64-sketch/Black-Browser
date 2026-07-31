@@ -75,12 +75,12 @@ namespace BlackNoirBrowser
         public MainForm()
         {
             logPath = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "debug.log");
-            Log("=== Black-Noir Browser starting ===");
+            Log("=== Black-Noir Browser (Chrome Light Edition) starting ===");
 
-            this.Text = "Black-Noir Browser";
+            this.Text = "Black-Noir Browser (Chrome Light)";
             this.Width = 1280;
             this.Height = 820;
-            this.BackColor = Color.FromArgb(20, 20, 22);
+            this.BackColor = Color.FromArgb(241, 243, 244); // Chrome light background
             this.MinimumSize = new Size(900, 600);
 
             string iconPath = Path.Combine(Application.StartupPath, "icon.ico");
@@ -119,39 +119,39 @@ namespace BlackNoirBrowser
             gcTimer.Start();
         }
 
-        // ─── UI Setup ─────────────────────────────────────────────────────────────
+        // ─── Chrome Light UI Setup ────────────────────────────────────────────────
 
         private void InitializeUI()
         {
-            // Top Panel for Toolbar
+            // Top Panel (Chrome Light Header - #DEE1E6)
             topPanel = new Panel();
             topPanel.Dock = DockStyle.Top;
-            topPanel.Height = 44;
-            topPanel.BackColor = Color.FromArgb(28, 28, 30);
+            topPanel.Height = 46;
+            topPanel.BackColor = Color.FromArgb(255, 255, 255); // Chrome toolbar white
             topPanel.Padding = new Padding(6, 6, 6, 6);
 
             // Nav Panel layout
             navPanel = new Panel();
             navPanel.Dock = DockStyle.Fill;
-            navPanel.BackColor = Color.FromArgb(28, 28, 30);
+            navPanel.BackColor = Color.FromArgb(255, 255, 255);
 
-            backBtn = CreateNavButton("◄", "Back (Alt+Left)", 0);
-            fwdBtn = CreateNavButton("►", "Forward (Alt+Right)", 34);
-            reloadBtn = CreateNavButton("↻", "Reload (Ctrl+R / F5)", 68);
+            backBtn = CreateChromeButton("←", "Back (Alt+Left)", 0);
+            fwdBtn = CreateChromeButton("→", "Forward (Alt+Right)", 36);
+            reloadBtn = CreateChromeButton("↻", "Reload (Ctrl+R / F5)", 72);
 
             backBtn.Click += (s, e) => { WebView2 wv = GetCurrentWebView(); if (wv != null && wv.CanGoBack) wv.GoBack(); };
             fwdBtn.Click += (s, e) => { WebView2 wv = GetCurrentWebView(); if (wv != null && wv.CanGoForward) wv.GoForward(); };
             reloadBtn.Click += (s, e) => ReloadCurrentTab();
 
-            // URL Bar
+            // Chrome Pill Address Bar
             urlBar = new TextBox();
-            urlBar.Location = new Point(106, 4);
-            urlBar.Width = this.Width - 310;
-            urlBar.Height = 28;
+            urlBar.Location = new Point(112, 6);
+            urlBar.Width = this.Width - 325;
+            urlBar.Height = 30;
             urlBar.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
-            urlBar.BackColor = Color.FromArgb(44, 44, 46);
-            urlBar.ForeColor = Color.White;
-            urlBar.Font = new Font("Segoe UI", 10f);
+            urlBar.BackColor = Color.FromArgb(241, 243, 244); // Chrome light URL bar fill
+            urlBar.ForeColor = Color.FromArgb(32, 33, 36);      // Dark text
+            urlBar.Font = new Font("Segoe UI", 10.5f);
             urlBar.BorderStyle = BorderStyle.FixedSingle;
 
             urlBar.KeyDown += (s, e) =>
@@ -164,17 +164,17 @@ namespace BlackNoirBrowser
             };
             urlBar.Click += (s, e) => urlBar.SelectAll();
 
-            // Shield Button
+            // Shield Button (Chrome Green Badge)
             shieldBtn = new Button();
             shieldBtn.Text = "🛡 0";
             shieldBtn.Width = 65;
-            shieldBtn.Height = 28;
+            shieldBtn.Height = 30;
             shieldBtn.Anchor = AnchorStyles.Right | AnchorStyles.Top;
-            shieldBtn.Location = new Point(this.Width - 195, 4);
+            shieldBtn.Location = new Point(this.Width - 200, 5);
             shieldBtn.FlatStyle = FlatStyle.Flat;
             shieldBtn.FlatAppearance.BorderSize = 0;
-            shieldBtn.BackColor = Color.FromArgb(40, 40, 44);
-            shieldBtn.ForeColor = Color.FromArgb(48, 209, 88);
+            shieldBtn.BackColor = Color.FromArgb(230, 244, 234);
+            shieldBtn.ForeColor = Color.FromArgb(19, 115, 51);
             shieldBtn.Font = new Font("Segoe UI", 9f, FontStyle.Bold);
             shieldBtn.Cursor = Cursors.Hand;
 
@@ -182,14 +182,14 @@ namespace BlackNoirBrowser
             newTabBtn = new Button();
             newTabBtn.Text = "+";
             newTabBtn.Width = 32;
-            newTabBtn.Height = 28;
+            newTabBtn.Height = 30;
             newTabBtn.Anchor = AnchorStyles.Right | AnchorStyles.Top;
-            newTabBtn.Location = new Point(this.Width - 125, 4);
+            newTabBtn.Location = new Point(this.Width - 130, 5);
             newTabBtn.FlatStyle = FlatStyle.Flat;
             newTabBtn.FlatAppearance.BorderSize = 0;
-            newTabBtn.BackColor = Color.FromArgb(50, 50, 54);
-            newTabBtn.ForeColor = Color.White;
-            newTabBtn.Font = new Font("Segoe UI", 11f, FontStyle.Bold);
+            newTabBtn.BackColor = Color.FromArgb(241, 243, 244);
+            newTabBtn.ForeColor = Color.FromArgb(60, 64, 67);
+            newTabBtn.Font = new Font("Segoe UI", 12f, FontStyle.Bold);
             newTabBtn.Cursor = Cursors.Hand;
             newTabBtn.Click += (s, e) => AddNewTab("New Tab", "about:blank");
 
@@ -197,13 +197,13 @@ namespace BlackNoirBrowser
             closeTabBtn = new Button();
             closeTabBtn.Text = "✕";
             closeTabBtn.Width = 32;
-            closeTabBtn.Height = 28;
+            closeTabBtn.Height = 30;
             closeTabBtn.Anchor = AnchorStyles.Right | AnchorStyles.Top;
-            closeTabBtn.Location = new Point(this.Width - 88, 4);
+            closeTabBtn.Location = new Point(this.Width - 92, 5);
             closeTabBtn.FlatStyle = FlatStyle.Flat;
             closeTabBtn.FlatAppearance.BorderSize = 0;
-            closeTabBtn.BackColor = Color.FromArgb(60, 40, 40);
-            closeTabBtn.ForeColor = Color.FromArgb(255, 100, 100);
+            closeTabBtn.BackColor = Color.FromArgb(252, 232, 230);
+            closeTabBtn.ForeColor = Color.FromArgb(217, 48, 37);
             closeTabBtn.Font = new Font("Segoe UI", 10f, FontStyle.Bold);
             closeTabBtn.Cursor = Cursors.Hand;
             closeTabBtn.Click += (s, e) => CloseCurrentTab();
@@ -217,10 +217,10 @@ namespace BlackNoirBrowser
             navPanel.Controls.Add(closeTabBtn);
             topPanel.Controls.Add(navPanel);
 
-            // TabControl
+            // TabControl (Chrome Light styling)
             tabControl = new TabControl();
             tabControl.Dock = DockStyle.Fill;
-            tabControl.Padding = new Point(12, 4);
+            tabControl.Padding = new Point(14, 5);
             tabControl.Font = new Font("Segoe UI", 9.5f);
             tabControl.SelectedIndexChanged += OnTabChanged;
 
@@ -233,7 +233,7 @@ namespace BlackNoirBrowser
             this.Resize += (s, e) =>
             {
                 if (urlBar != null)
-                    urlBar.Width = Math.Max(200, this.Width - 310);
+                    urlBar.Width = Math.Max(200, this.Width - 325);
 
                 if (this.WindowState == FormWindowState.Minimized)
                 {
@@ -247,18 +247,18 @@ namespace BlackNoirBrowser
             };
         }
 
-        private Button CreateNavButton(string text, string tooltip, int left)
+        private Button CreateChromeButton(string text, string tooltip, int left)
         {
             Button b = new Button();
             b.Text = text;
-            b.Location = new Point(left + 6, 4);
+            b.Location = new Point(left + 4, 5);
             b.Width = 30;
-            b.Height = 28;
+            b.Height = 30;
             b.FlatStyle = FlatStyle.Flat;
             b.FlatAppearance.BorderSize = 0;
-            b.BackColor = Color.FromArgb(44, 44, 46);
-            b.ForeColor = Color.White;
-            b.Font = new Font("Segoe UI", 9.5f, FontStyle.Bold);
+            b.BackColor = Color.FromArgb(255, 255, 255);
+            b.ForeColor = Color.FromArgb(95, 99, 104);
+            b.Font = new Font("Segoe UI", 10f, FontStyle.Bold);
             b.Cursor = Cursors.Hand;
             return b;
         }
@@ -288,7 +288,7 @@ namespace BlackNoirBrowser
                 webViewEnv = await CoreWebView2Environment.CreateAsync(null, userDataFolder, options);
                 Log("Environment created successfully");
 
-                AddNewTab("Black-Noir", "about:blank");
+                AddNewTab("New Tab", "about:blank");
             }
             catch (Exception ex)
             {
@@ -304,7 +304,7 @@ namespace BlackNoirBrowser
             if (webViewEnv == null) return;
 
             TabPage page = new TabPage(title);
-            page.BackColor = Color.Black;
+            page.BackColor = Color.White;
 
             WebView2 wv = new WebView2();
             wv.Dock = DockStyle.Fill;
@@ -320,13 +320,9 @@ namespace BlackNoirBrowser
                     e.State = CoreWebView2PermissionState.Allow;
             };
 
-            // Network Ad Blocking
             SetupNetworkBlocking(wv);
-
-            // Injected Ad-Block & Anti-Adblock JS
             await wv.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(GetAdBlockerJS());
 
-            // Listen to IPC WebMessage for Ad Counter
             wv.CoreWebView2.WebMessageReceived += (s, e) =>
             {
                 try
@@ -341,7 +337,6 @@ namespace BlackNoirBrowser
                 catch { }
             };
 
-            // Event bindings
             wv.CoreWebView2.NavigationStarting += (s, e) =>
             {
                 if (tabControl.SelectedTab == page)
@@ -367,7 +362,7 @@ namespace BlackNoirBrowser
 
             if (url == "about:blank" || string.IsNullOrEmpty(url))
             {
-                wv.CoreWebView2.NavigateToString(GetSpeedDialHTML());
+                wv.CoreWebView2.NavigateToString(GetChromeLightSpeedDialHTML());
             }
             else
             {
@@ -392,13 +387,12 @@ namespace BlackNoirBrowser
             }
             else
             {
-                // If last tab, reset to speed dial
                 WebView2 wv = GetCurrentWebView();
                 if (wv != null && wv.CoreWebView2 != null)
                 {
-                    wv.CoreWebView2.NavigateToString(GetSpeedDialHTML());
+                    wv.CoreWebView2.NavigateToString(GetChromeLightSpeedDialHTML());
                     urlBar.Text = "";
-                    tabControl.SelectedTab.Text = "Black-Noir";
+                    tabControl.SelectedTab.Text = "New Tab";
                 }
             }
         }
@@ -574,9 +568,9 @@ true;
 ";
         }
 
-        // ─── Speed Dial HTML Page ────────────────────────────────────────────────
+        // ─── Chrome Light Speed Dial HTML Page ─────────────────────────────────────
 
-        private string GetSpeedDialHTML()
+        private string GetChromeLightSpeedDialHTML()
         {
             return @"<!DOCTYPE html>
 <html>
@@ -584,34 +578,40 @@ true;
 <meta charset='utf-8'>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Segoe UI',sans-serif;background:#121214;color:#e0e0e0;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;overflow:hidden}
-.logo{font-size:38px;font-weight:700;letter-spacing:3px;color:#fff;margin-bottom:6px;display:flex;align-items:center;gap:12px}
-.logo span{color:#0a84ff}
-.tagline{color:#8e8e93;font-size:13px;margin-bottom:30px}
-.search-box{display:flex;width:100%;max-width:540px;margin-bottom:36px;border-radius:10px;background:#242428;border:1px solid #3a3a3c;padding:4px}
-.search-box input{flex:1;background:transparent;border:none;outline:none;color:#fff;font-size:15px;padding:10px 14px}
-.search-box button{background:#0a84ff;border:none;color:#fff;padding:0 18px;border-radius:8px;font-weight:600;cursor:pointer}
-.dials{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;width:100%;max-width:540px}
-.dial{display:flex;flex-direction:column;align-items:center;gap:10px;padding:18px;background:rgba(255,255,255,0.04);border-radius:12px;border:1px solid rgba(255,255,255,0.06);cursor:pointer;transition:all .15s ease;text-decoration:none;color:#fff}
-.dial:hover{background:rgba(255,255,255,0.08);transform:translateY(-2px);border-color:#0a84ff}
-.dial-icon{width:46px;height:46px;border-radius:12px;background:#2c2c2e;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:bold;color:#0a84ff}
-.dial-label{font-size:12px;color:#c7c7cc;font-weight:500}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#ffffff;color:#202124;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;overflow:hidden;-webkit-font-smoothing:antialiased}
+.logo{font-size:56px;font-weight:600;letter-spacing:-1px;margin-bottom:28px;display:flex;align-items:center;gap:2px;user-select:none}
+.g-blue{color:#4285f4}.g-red{color:#ea4335}.g-yellow{color:#fbbc05}.g-green{color:#34a853}
+.search-container{width:100%;max-width:584px;margin-bottom:32px}
+.search-box{display:flex;align-items:center;width:100%;height:46px;padding:0 16px;border-radius:24px;background:#ffffff;border:1px solid #dfe1e5;box-shadow:0 1px 6px rgba(32,33,36,0.12);transition:box-shadow .2s ease,border-color .2s ease}
+.search-box:hover,.search-box:focus-within{box-shadow:0 1px 6px rgba(32,33,36,0.28);border-color:transparent}
+.search-icon{color:#9aa0a6;font-size:16px;margin-right:12px}
+.search-box input{flex:1;background:transparent;border:none;outline:none;color:#202124;font-size:16px}
+.search-box button{background:none;border:none;color:#1a73e8;font-weight:600;font-size:14px;cursor:pointer;padding:0 8px}
+.dials{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;width:100%;max-width:560px}
+.dial{display:flex;flex-direction:column;align-items:center;gap:12px;padding:16px;border-radius:12px;cursor:pointer;transition:all .15s ease;text-decoration:none;color:#3c4043}
+.dial:hover{background:#f1f3f4}
+.dial-icon{width:48px;height:48px;border-radius:50%;background:#f1f3f4;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:bold;color:#1a73e8;box-shadow:0 1px 3px rgba(0,0,0,0.1)}
+.dial-label{font-size:12px;color:#3c4043;font-weight:500;text-align:center}
 </style>
 </head>
 <body>
-<div class='logo'>BLACK<span>NOIR</span></div>
-<div class='tagline'>Ultra-lightweight Private Browser with Built-in Ad Shield</div>
-<form class='search-box' action='https://www.google.com/search' method='get'>
-  <input type='text' name='q' placeholder='Search Google or enter Web Address...' autofocus autocomplete='off'>
-  <button type='submit'>Search</button>
+<div class='logo'>
+  <span class='g-blue'>G</span><span class='g-red'>o</span><span class='g-yellow'>o</span><span class='g-blue'>g</span><span class='g-green'>l</span><span class='g-red'>e</span>
+</div>
+<form class='search-container' action='https://www.google.com/search' method='get'>
+  <div class='search-box'>
+    <span class='search-icon'>🔍</span>
+    <input type='text' name='q' placeholder='Search Google or type a URL' autofocus autocomplete='off'>
+    <button type='submit'>Search</button>
+  </div>
 </form>
 <div class='dials'>
-  <a class='dial' href='https://www.google.com'><div class='dial-icon'>G</div><div class='dial-label'>Google</div></a>
-  <a class='dial' href='https://www.youtube.com'><div class='dial-icon' style='color:#ff453a'>Y</div><div class='dial-label'>YouTube</div></a>
-  <a class='dial' href='https://music.youtube.com'><div class='dial-icon' style='color:#ff9f0a'>M</div><div class='dial-label'>YT Music</div></a>
-  <a class='dial' href='https://github.com'><div class='dial-icon' style='color:#fff'>GH</div><div class='dial-label'>GitHub</div></a>
-  <a class='dial' href='https://reddit.com'><div class='dial-icon' style='color:#ff453a'>R</div><div class='dial-label'>Reddit</div></a>
-  <a class='dial' href='https://chatgpt.com'><div class='dial-icon' style='color:#30d158'>AI</div><div class='dial-label'>ChatGPT</div></a>
+  <a class='dial' href='https://www.google.com'><div class='dial-icon' style='background:#e8f0fe;color:#1a73e8'>G</div><div class='dial-label'>Google</div></a>
+  <a class='dial' href='https://www.youtube.com'><div class='dial-icon' style='background:#fce8e6;color:#d93025'>Y</div><div class='dial-label'>YouTube</div></a>
+  <a class='dial' href='https://music.youtube.com'><div class='dial-icon' style='background:#fef7e0;color:#f29900'>M</div><div class='dial-label'>YT Music</div></a>
+  <a class='dial' href='https://github.com'><div class='dial-icon' style='background:#e8eaed;color:#202124'>GH</div><div class='dial-label'>GitHub</div></a>
+  <a class='dial' href='https://reddit.com'><div class='dial-icon' style='background:#fce8e6;color:#d93025'>R</div><div class='dial-label'>Reddit</div></a>
+  <a class='dial' href='https://chatgpt.com'><div class='dial-icon' style='background:#e6f4ea;color:#137333'>AI</div><div class='dial-label'>ChatGPT</div></a>
 </div>
 </body>
 </html>";
@@ -622,7 +622,7 @@ body{font-family:'Segoe UI',sans-serif;background:#121214;color:#e0e0e0;display:
         private void SetupTray()
         {
             trayIcon = new NotifyIcon();
-            trayIcon.Text = "Black-Noir Browser";
+            trayIcon.Text = "Black-Noir Browser (Chrome Light)";
 
             string iconPath = Path.Combine(Application.StartupPath, "icon.ico");
             if (File.Exists(iconPath))
