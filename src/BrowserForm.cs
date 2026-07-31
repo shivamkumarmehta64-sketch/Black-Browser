@@ -805,10 +805,14 @@ namespace BlackBrowser
                         return;
                     }
 
-                    if (e.Uri.Equals("black://extensions", StringComparison.OrdinalIgnoreCase) ||
-                        e.Uri.Equals("about:extensions", StringComparison.OrdinalIgnoreCase))
+                    if (e.Uri.StartsWith("black://extensions", StringComparison.OrdinalIgnoreCase) ||
+                        e.Uri.StartsWith("about:extensions", StringComparison.OrdinalIgnoreCase))
                     {
                         e.Cancel = true;
+                        if (e.Uri.Contains("?action="))
+                        {
+                            HandleExtensionAction(e.Uri);
+                        }
                         wv.CoreWebView2.NavigateToString(ExtensionsManager.GetExtensionsHtml(isDarkMode));
                         if (tabControl.SelectedTab == page) { urlBar.Text = "black://extensions"; page.Text = "Extensions"; }
                         return;
@@ -984,9 +988,13 @@ namespace BlackBrowser
                     return;
                 }
 
-                if (input.Equals("black://extensions", StringComparison.OrdinalIgnoreCase) ||
-                    input.Equals("about:extensions", StringComparison.OrdinalIgnoreCase))
+                if (input.StartsWith("black://extensions", StringComparison.OrdinalIgnoreCase) ||
+                    input.StartsWith("about:extensions", StringComparison.OrdinalIgnoreCase))
                 {
+                    if (input.Contains("?action="))
+                    {
+                        HandleExtensionAction(input);
+                    }
                     wv.CoreWebView2.NavigateToString(ExtensionsManager.GetExtensionsHtml(isDarkMode));
                     urlBar.Text = "black://extensions";
                     if (tabControl.SelectedTab != null) tabControl.SelectedTab.Text = "Extensions";
@@ -995,6 +1003,71 @@ namespace BlackBrowser
 
                 string target = FormatUrl(input);
                 wv.CoreWebView2.Navigate(target);
+            }
+        }
+
+        private void HandleExtensionAction(string uri)
+        {
+            try
+            {
+                if (uri.Contains("action=load_unpacked"))
+                {
+                    using (FolderBrowserDialog fbd = new FolderBrowserDialog())
+                    {
+                        fbd.Description = "Select Unpacked Extension Folder (containing manifest.json)";
+                        if (fbd.ShowDialog() == DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath))
+                        {
+                            string folderName = Path.GetFileName(fbd.SelectedPath);
+                            string extBaseDir = Path.Combine(
+                                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                                "black-webview2", "Extensions", folderName);
+
+                            if (Directory.Exists(extBaseDir)) Directory.Delete(extBaseDir, true);
+                            Directory.CreateDirectory(extBaseDir);
+
+                            foreach (string dirPath in Directory.GetDirectories(fbd.SelectedPath, "*", SearchOption.AllDirectories))
+                            {
+                                Directory.CreateDirectory(dirPath.Replace(fbd.SelectedPath, extBaseDir));
+                            }
+                            foreach (string filePath in Directory.GetFiles(fbd.SelectedPath, "*.*", SearchOption.AllDirectories))
+                            {
+                                File.Copy(filePath, filePath.Replace(fbd.SelectedPath, extBaseDir), true);
+                            }
+
+                            WebView2 wv = GetCurrentWebView();
+                            if (wv != null && wv.CoreWebView2 != null)
+                            {
+                                try { wv.CoreWebView2.Profile.AddBrowserExtensionAsync(extBaseDir); } catch { }
+                            }
+
+                            ShowSoftCommunication("🧩 Unpacked Extension Loaded: " + folderName);
+                        }
+                    }
+                }
+                else if (uri.Contains("action=remove") && uri.Contains("id="))
+                {
+                    int idIdx = uri.IndexOf("id=");
+                    if (idIdx != -1)
+                    {
+                        string id = Uri.UnescapeDataString(uri.Substring(idIdx + 3));
+                        int ampIdx = id.IndexOf("&");
+                        if (ampIdx != -1) id = id.Substring(0, ampIdx);
+
+                        string extDir = Path.Combine(
+                            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                            "black-webview2", "Extensions", id);
+
+                        if (Directory.Exists(extDir))
+                        {
+                            Directory.Delete(extDir, true);
+                            ShowSoftCommunication("🗑️ Extension Removed: " + id);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log("ExtensionAction Error: " + ex.ToString());
             }
         }
 
