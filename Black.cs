@@ -50,6 +50,57 @@ namespace BlackBrowser
         }
     }
 
+    // ─── Eye Care Fullscreen Overlay ──────────────────────────────────────────
+
+    public class EyeCareOverlayForm : Form
+    {
+        private const int WS_EX_TRANSPARENT = 0x20;
+        private const int WS_EX_LAYERED = 0x80000;
+
+        protected override CreateParams CreateParams
+        {
+            get
+            {
+                CreateParams cp = base.CreateParams;
+                cp.ExStyle |= WS_EX_TRANSPARENT | WS_EX_LAYERED;
+                return cp;
+            }
+        }
+
+        public EyeCareOverlayForm()
+        {
+            this.FormBorderStyle = FormBorderStyle.None;
+            this.ShowInTaskbar = false;
+            this.TopMost = true;
+            this.StartPosition = FormStartPosition.Manual;
+            this.Bounds = Screen.PrimaryScreen.Bounds;
+            this.BackColor = Color.Black;
+            this.Opacity = 0.25;
+        }
+
+        public void SetMode(int mode)
+        {
+            if (mode == 1)
+            {
+                // Warm Blue Light Filter
+                this.BackColor = Color.FromArgb(255, 170, 0);
+                this.Opacity = 0.18;
+                this.Show();
+            }
+            else if (mode == 2)
+            {
+                // Dark Night Dimmer
+                this.BackColor = Color.Black;
+                this.Opacity = 0.35;
+                this.Show();
+            }
+            else
+            {
+                this.Hide();
+            }
+        }
+    }
+
     public class MainForm : Form
     {
         private Panel topPanel;
@@ -60,11 +111,15 @@ namespace BlackBrowser
         private Button reloadBtn;
         private TextBox urlBar;
         private Button shieldBtn;
+        private Button eyeCareBtn;
         private Button extBtn;
         private Button newTabBtn;
         private Button closeTabBtn;
         private NotifyIcon trayIcon;
         private System.Windows.Forms.Timer gcTimer;
+
+        private EyeCareOverlayForm eyeCareOverlay;
+        private int eyeCareMode = 0; // 0 = Off, 1 = Warm Filter, 2 = Dark Dimmer
 
         private CoreWebView2Environment webViewEnv;
         private int totalBlockedAds = 0;
@@ -76,17 +131,19 @@ namespace BlackBrowser
         public MainForm()
         {
             logPath = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "debug.log");
-            Log("=== Black Browser (Edge Light Edition) starting ===");
+            Log("=== Black Browser (Edge Light + Eye Care) starting ===");
 
             this.Text = "Black (Edge Light Version)";
             this.Width = 1280;
             this.Height = 820;
-            this.BackColor = Color.FromArgb(243, 243, 243); // Edge light window header
+            this.BackColor = Color.FromArgb(243, 243, 243);
             this.MinimumSize = new Size(900, 600);
 
             string iconPath = Path.Combine(Application.StartupPath, "icon.ico");
             if (File.Exists(iconPath))
                 this.Icon = new Icon(iconPath);
+
+            eyeCareOverlay = new EyeCareOverlayForm();
 
             InitializeUI();
             SetupTray();
@@ -124,7 +181,6 @@ namespace BlackBrowser
 
         private void InitializeUI()
         {
-            // Top Panel (Edge Light Toolbar - #FFFFFF)
             topPanel = new Panel();
             topPanel.Dock = DockStyle.Top;
             topPanel.Height = 46;
@@ -143,10 +199,10 @@ namespace BlackBrowser
             fwdBtn.Click += (s, e) => { WebView2 wv = GetCurrentWebView(); if (wv != null && wv.CanGoForward) wv.GoForward(); };
             reloadBtn.Click += (s, e) => ReloadCurrentTab();
 
-            // Edge Address Pill Bar (#F3F3F3)
+            // Edge Address Pill Bar
             urlBar = new TextBox();
             urlBar.Location = new Point(112, 6);
-            urlBar.Width = this.Width - 410;
+            urlBar.Width = this.Width - 490;
             urlBar.Height = 30;
             urlBar.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
             urlBar.BackColor = Color.FromArgb(243, 243, 243);
@@ -164,13 +220,13 @@ namespace BlackBrowser
             };
             urlBar.Click += (s, e) => urlBar.SelectAll();
 
-            // Shield Button (Edge Green Protection Pill)
+            // Shield Button
             shieldBtn = new Button();
             shieldBtn.Text = "🛡 0";
             shieldBtn.Width = 62;
             shieldBtn.Height = 30;
             shieldBtn.Anchor = AnchorStyles.Right | AnchorStyles.Top;
-            shieldBtn.Location = new Point(this.Width - 280, 5);
+            shieldBtn.Location = new Point(this.Width - 365, 5);
             shieldBtn.FlatStyle = FlatStyle.Flat;
             shieldBtn.FlatAppearance.BorderSize = 0;
             shieldBtn.BackColor = Color.FromArgb(230, 244, 234);
@@ -178,17 +234,32 @@ namespace BlackBrowser
             shieldBtn.Font = new Font("Segoe UI", 9f, FontStyle.Bold);
             shieldBtn.Cursor = Cursors.Hand;
 
-            // Chrome/Edge Extension Store Button
+            // Eye Care Screen Overlay Button
+            eyeCareBtn = new Button();
+            eyeCareBtn.Text = "👁 Eye Care";
+            eyeCareBtn.Width = 90;
+            eyeCareBtn.Height = 30;
+            eyeCareBtn.Anchor = AnchorStyles.Right | AnchorStyles.Top;
+            eyeCareBtn.Location = new Point(this.Width - 297, 5);
+            eyeCareBtn.FlatStyle = FlatStyle.Flat;
+            eyeCareBtn.FlatAppearance.BorderSize = 0;
+            eyeCareBtn.BackColor = Color.FromArgb(254, 247, 224);
+            eyeCareBtn.ForeColor = Color.FromArgb(180, 100, 0);
+            eyeCareBtn.Font = new Font("Segoe UI", 8.5f, FontStyle.Bold);
+            eyeCareBtn.Cursor = Cursors.Hand;
+            eyeCareBtn.Click += (s, e) => CycleEyeCareMode();
+
+            // Extensions Button
             extBtn = new Button();
             extBtn.Text = "🧩 Extensions";
             extBtn.Width = 100;
             extBtn.Height = 30;
             extBtn.Anchor = AnchorStyles.Right | AnchorStyles.Top;
-            extBtn.Location = new Point(this.Width - 212, 5);
+            extBtn.Location = new Point(this.Width - 202, 5);
             extBtn.FlatStyle = FlatStyle.Flat;
             extBtn.FlatAppearance.BorderSize = 0;
             extBtn.BackColor = Color.FromArgb(235, 243, 252);
-            extBtn.ForeColor = Color.FromArgb(0, 120, 212); // Edge Blue
+            extBtn.ForeColor = Color.FromArgb(0, 120, 212);
             extBtn.Font = new Font("Segoe UI", 8.5f, FontStyle.Bold);
             extBtn.Cursor = Cursors.Hand;
             extBtn.Click += (s, e) => AddNewTab("Edge Add-ons", "https://microsoftedge.microsoft.com/addons");
@@ -199,7 +270,7 @@ namespace BlackBrowser
             newTabBtn.Width = 32;
             newTabBtn.Height = 30;
             newTabBtn.Anchor = AnchorStyles.Right | AnchorStyles.Top;
-            newTabBtn.Location = new Point(this.Width - 105, 5);
+            newTabBtn.Location = new Point(this.Width - 98, 5);
             newTabBtn.FlatStyle = FlatStyle.Flat;
             newTabBtn.FlatAppearance.BorderSize = 0;
             newTabBtn.BackColor = Color.FromArgb(243, 243, 243);
@@ -214,7 +285,7 @@ namespace BlackBrowser
             closeTabBtn.Width = 32;
             closeTabBtn.Height = 30;
             closeTabBtn.Anchor = AnchorStyles.Right | AnchorStyles.Top;
-            closeTabBtn.Location = new Point(this.Width - 68, 5);
+            closeTabBtn.Location = new Point(this.Width - 62, 5);
             closeTabBtn.FlatStyle = FlatStyle.Flat;
             closeTabBtn.FlatAppearance.BorderSize = 0;
             closeTabBtn.BackColor = Color.FromArgb(253, 231, 233);
@@ -228,6 +299,7 @@ namespace BlackBrowser
             navPanel.Controls.Add(reloadBtn);
             navPanel.Controls.Add(urlBar);
             navPanel.Controls.Add(shieldBtn);
+            navPanel.Controls.Add(eyeCareBtn);
             navPanel.Controls.Add(extBtn);
             navPanel.Controls.Add(newTabBtn);
             navPanel.Controls.Add(closeTabBtn);
@@ -249,7 +321,7 @@ namespace BlackBrowser
             this.Resize += (s, e) =>
             {
                 if (urlBar != null)
-                    urlBar.Width = Math.Max(200, this.Width - 410);
+                    urlBar.Width = Math.Max(200, this.Width - 490);
 
                 if (this.WindowState == FormWindowState.Minimized)
                 {
@@ -277,6 +349,28 @@ namespace BlackBrowser
             b.Font = new Font("Segoe UI", 10f, FontStyle.Bold);
             b.Cursor = Cursors.Hand;
             return b;
+        }
+
+        private void CycleEyeCareMode()
+        {
+            eyeCareMode = (eyeCareMode + 1) % 3;
+            eyeCareOverlay.SetMode(eyeCareMode);
+
+            if (eyeCareMode == 1)
+            {
+                eyeCareBtn.Text = "👁 Warm";
+                eyeCareBtn.BackColor = Color.FromArgb(254, 235, 180);
+            }
+            else if (eyeCareMode == 2)
+            {
+                eyeCareBtn.Text = "👁 Dimmed";
+                eyeCareBtn.BackColor = Color.FromArgb(220, 220, 220);
+            }
+            else
+            {
+                eyeCareBtn.Text = "👁 Eye Care";
+                eyeCareBtn.BackColor = Color.FromArgb(254, 247, 224);
+            }
         }
 
         // ─── Environment Initialization ──────────────────────────────────────────
@@ -696,6 +790,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,SegoeUI,'Hel
                 e.SuppressKeyPress = true;
                 ReloadCurrentTab();
             }
+            else if (e.Control && e.Shift && e.KeyCode == Keys.E)
+            {
+                e.SuppressKeyPress = true;
+                CycleEyeCareMode();
+            }
             else if (e.Alt && e.KeyCode == Keys.Left)
             {
                 e.SuppressKeyPress = true;
@@ -760,8 +859,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,SegoeUI,'Hel
         {
             if (disposing)
             {
-                if (trayIcon != null) { trayIcon.Visible = false; trayIcon.Dispose(); }
-                if (gcTimer  != null) gcTimer.Dispose();
+                if (eyeCareOverlay != null) eyeCareOverlay.Dispose();
+                if (trayIcon       != null) { trayIcon.Visible = false; trayIcon.Dispose(); }
+                if (gcTimer        != null) gcTimer.Dispose();
             }
             base.Dispose(disposing);
         }
