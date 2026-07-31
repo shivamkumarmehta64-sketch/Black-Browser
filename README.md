@@ -1,35 +1,33 @@
-# Black-Noir Browser — Ultra-Lightweight Private Web Browser
+# Black Browser — Edge Light Version on Windows
 
-A native, high-performance Windows web browser built with C# (.NET Framework 4.8) and Microsoft WebView2. Designed for maximum privacy, instant startup, low RAM consumption, and seamless ad blocking.
+A native, ultra-lightweight Windows web browser styled after Microsoft Edge Light Mode, built with C# (.NET Framework 4.8) and Microsoft WebView2. Packed with Chrome extension availability, Edge Add-ons integration, 3-layer ad blocking, and minimum RAM consumption.
 
-![Black-Noir Icon](icon.png)
+![Black Icon](icon.png)
 
 ---
 
-## ✨ Key Features
+## ✨ Features
 
-- 🗂️ **Multi-Tab Browsing**:
-  - Open (`Ctrl+T`), switch, and close (`Ctrl+W`) multiple tabs seamlessly.
+- 🌐 **Microsoft Edge Light Design**:
+  - Clean white Edge toolbar (`#FFFFFF`), Edge pill address bar (`#F3F3F3`), and rounded light tabs.
 
-- 🛑 **Built-in 3-Layer Ad-Blocker & Shield Badge**:
-  - **Network Domain Filter**: Blocks 35+ top ad & tracking networks (`doubleclick.net`, `googlesyndication.com`, `adservice.google.com`, etc.).
-  - **JSON Payload Stripping**: Intercepts YouTube & Web API ad definitions dynamically.
-  - **DOM Muting & Fast-Forwarding**: Silently mutes video ad elements and skips them at 16x speed.
-  - **Live Shield Counter**: Real-time counter in toolbar showing total blocked ads & trackers.
+- 🧩 **Chrome & Edge Extensions Integration**:
+  - Direct access to Microsoft Edge Add-ons and Chrome Web Store via `🧩 Extensions` toolbar button.
 
-- 🏠 **Dark Speed Dial (New Tab Page)**:
-  - Sleek dark aesthetic start page with quick dial shortcuts (Google, YouTube, YT Music, GitHub, Reddit, ChatGPT) and search bar.
+- 🛑 **3-Layer Ad Blocker & Shield Badge Counter**:
+  - Network domain filter, JSON payload stripper, and DOM mute-skipper with real-time blocked counter (`🛡 N`).
+
+- 🏠 **Edge Light Speed Dial (New Tab Page)**:
+  - Clean speed dial page with quick links (Google, YouTube, YT Music, Edge Add-ons, Chrome Web Store, GitHub, Reddit, ChatGPT) and search bar.
 
 - ⚡ **Resource & Memory Optimization**:
-  - **Chromium Launch Flags**: Restricted disk/media cache (32MB), single renderer process, and JS heap limit (128MB).
-  - **Process Suspension**: WebView2 process suspends when minimized to tray, freeing physical RAM.
-  - **Automated GC**: Background garbage collection runs every 60 seconds (`SetProcessWorkingSetSize` memory trim).
-  - **RAM Usage**: ~70–100 MB active | ~35–50 MB minimized in system tray.
+  - Restricted Chromium cache (32MB), single renderer process, and JS heap limit (128MB).
+  - Process suspension (`TrySuspendAsync()`) + `SetProcessWorkingSetSize` memory trim on tray minimize (**~35–50 MB RAM in tray**).
 
 - 🎛️ **Keyboard Shortcuts & Navigation**:
   - `Ctrl + T`: New Tab
   - `Ctrl + W`: Close Current Tab
-  - `Ctrl + L`: Focus & Select Address Bar
+  - `Ctrl + L`: Focus Address Bar
   - `Ctrl + R` / `F5`: Reload Page
   - `Alt + Left` / `Alt + Right`: Back / Forward Navigation
   - `F11`: Fullscreen Toggle
@@ -38,16 +36,11 @@ A native, high-performance Windows web browser built with C# (.NET Framework 4.8
 
 ## 🛠️ Build & Installation
 
-- **OS**: Windows 10 / Windows 11 (64-bit)
-- **Runtime**: [.NET Framework 4.8](https://dotnet.microsoft.com/download/dotnet-framework/net48) (Pre-installed on Windows 10/11) + [Microsoft WebView2 Runtime](https://developer.microsoft.com/en-us/microsoft-edge/webview2/)
-
-### Compilation
-
 ```cmd
-C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe /target:winexe /reference:Microsoft.Web.WebView2.Core.dll /reference:Microsoft.Web.WebView2.WinForms.dll /out:BlackNoir.exe BlackNoir.cs
+C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe /target:winexe /reference:Microsoft.Web.WebView2.Core.dll /reference:Microsoft.Web.WebView2.WinForms.dll /out:Black.exe Black.cs
 ```
 
-Or simply run `setup.bat`.
+Or run `setup.bat`.
 
 ---
 
