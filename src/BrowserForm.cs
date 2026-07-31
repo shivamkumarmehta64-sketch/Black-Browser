@@ -12,6 +12,9 @@ namespace BlackBrowser
     {
         private Panel headerContainer;
         private Panel omniboxPanel;
+        private FlowLayoutPanel actionsPanel;
+        private Panel softBanner;
+        private Label softBannerLabel;
         private TabControl tabControl;
 
         private Button backBtn;
@@ -19,6 +22,7 @@ namespace BlackBrowser
         private Button reloadBtn;
         private Button homeBtn;
         private TextBox urlBar;
+        private Button starBtn;
         private Button shieldBtn;
         private Button eyeCareBtn;
         private Button notesBtn;
@@ -30,6 +34,7 @@ namespace BlackBrowser
         private ContextMenuStrip mainMenu;
         private NotifyIcon trayIcon;
         private Timer gcTimer;
+        private Timer bannerTimer;
 
         private EyeCareOverlayForm eyeCareOverlay;
         private int eyeCareMode = 0;
@@ -42,7 +47,7 @@ namespace BlackBrowser
         public BrowserForm()
         {
             logPath = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "debug.log");
-            Log("=== Black Browser starting (Home Button Fix v5.2) ===");
+            Log("=== Black Browser starting (YouTube Ad-Free Launcher v8.2) ===");
 
             this.SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint, true);
             this.DoubleBuffered = true;
@@ -50,7 +55,7 @@ namespace BlackBrowser
             this.Text = "Black Browser";
             this.Width = 1280;
             this.Height = 820;
-            this.BackColor = Color.FromArgb(222, 225, 230);
+            this.BackColor = Color.FromArgb(245, 246, 250);
             this.MinimumSize = new Size(900, 600);
             this.StartPosition = FormStartPosition.CenterScreen;
 
@@ -99,8 +104,30 @@ namespace BlackBrowser
         {
             headerContainer = new Panel();
             headerContainer.Dock = DockStyle.Top;
-            headerContainer.Height = 44;
+            headerContainer.Height = 68;
             headerContainer.BackColor = Color.FromArgb(222, 225, 230);
+
+            softBanner = new Panel();
+            softBanner.Dock = DockStyle.Top;
+            softBanner.Height = 24;
+            softBanner.BackColor = Color.FromArgb(26, 115, 232);
+
+            softBannerLabel = new Label();
+            softBannerLabel.Dock = DockStyle.Fill;
+            softBannerLabel.Text = "✨ Black Browser Active — 100% Ad-Free YouTube & Zero Trackers";
+            softBannerLabel.ForeColor = Color.White;
+            softBannerLabel.Font = new Font("Segoe UI", 8.5f, FontStyle.Bold);
+            softBannerLabel.TextAlign = ContentAlignment.MiddleCenter;
+
+            softBanner.Controls.Add(softBannerLabel);
+
+            bannerTimer = new Timer();
+            bannerTimer.Interval = 4000;
+            bannerTimer.Tick += (s, e) =>
+            {
+                softBannerLabel.Text = "✨ Black Browser Active — 100% Ad-Free YouTube & Zero Trackers";
+                bannerTimer.Stop();
+            };
 
             omniboxPanel = new Panel();
             omniboxPanel.Dock = DockStyle.Fill;
@@ -117,9 +144,50 @@ namespace BlackBrowser
             reloadBtn.Click += (s, e) => ReloadCurrentTab();
             homeBtn.Click += (s, e) => NavigateCurrentTab("about:blank");
 
+            actionsPanel = new FlowLayoutPanel();
+            actionsPanel.Dock = DockStyle.Right;
+            actionsPanel.Height = 32;
+            actionsPanel.AutoSize = true;
+            actionsPanel.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            actionsPanel.FlowDirection = FlowDirection.RightToLeft;
+            actionsPanel.WrapContents = false;
+            actionsPanel.Padding = new Padding(0, 2, 4, 0);
+
+            menuBtn = CreateActionBtn("⋮", Color.FromArgb(255, 255, 255), Color.FromArgb(95, 99, 104), 32);
+            menuBtn.Click += (s, e) => mainMenu.Show(menuBtn, new Point(0, menuBtn.Height));
+
+            addTabBtn = CreateActionBtn("+ Tab", Color.FromArgb(232, 240, 254), Color.FromArgb(26, 115, 232), 56);
+            addTabBtn.Click += (s, e) => AddNewTab("New Tab", "about:blank");
+
+            extBtn = CreateActionBtn("🧩 Ext", Color.FromArgb(241, 243, 244), Color.FromArgb(95, 99, 104), 64);
+            extBtn.Click += (s, e) => AddNewTab("Chrome Extensions", "https://chromewebstore.google.com");
+
+            settingsBtn = CreateActionBtn("⚙️", Color.FromArgb(241, 243, 244), Color.FromArgb(95, 99, 104), 36);
+            settingsBtn.Click += (s, e) => OpenSettingsDialog(0);
+
+            notesBtn = CreateActionBtn("📝 Notes", Color.FromArgb(235, 235, 245), Color.FromArgb(40, 40, 60), 68);
+            notesBtn.Click += (s, e) => OpenSettingsDialog(2);
+
+            eyeCareBtn = CreateActionBtn("👁 Eye", Color.FromArgb(254, 247, 224), Color.FromArgb(180, 100, 0), 64);
+            eyeCareBtn.Click += (s, e) => CycleEyeCareMode();
+
+            shieldBtn = CreateActionBtn("🛡 0", Color.FromArgb(232, 240, 254), Color.FromArgb(26, 115, 232), 62);
+            shieldBtn.Click += (s, e) => ShowAdShieldStatus();
+
+            starBtn = CreateActionBtn("⭐", Color.FromArgb(254, 247, 224), Color.FromArgb(180, 100, 0), 32);
+            starBtn.Click += (s, e) => ToggleCurrentTabBookmark();
+
+            actionsPanel.Controls.Add(menuBtn);
+            actionsPanel.Controls.Add(addTabBtn);
+            actionsPanel.Controls.Add(extBtn);
+            actionsPanel.Controls.Add(settingsBtn);
+            actionsPanel.Controls.Add(notesBtn);
+            actionsPanel.Controls.Add(eyeCareBtn);
+            actionsPanel.Controls.Add(shieldBtn);
+            actionsPanel.Controls.Add(starBtn);
+
             urlBar = new TextBox();
             urlBar.Location = new Point(136, 7);
-            urlBar.Width = this.Width - 580;
             urlBar.Height = 28;
             urlBar.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
             urlBar.BackColor = Color.FromArgb(241, 243, 244);
@@ -138,42 +206,15 @@ namespace BlackBrowser
             urlBar.Click += (s, e) => urlBar.SelectAll();
             urlBar.GotFocus += (s, e) => urlBar.SelectAll();
 
-            shieldBtn = CreateActionBtn("🛡 0", Color.FromArgb(232, 240, 254), Color.FromArgb(26, 115, 232), 62, this.Width - 435);
-            shieldBtn.Click += (s, e) => ShowAdShieldStatus();
-
-            eyeCareBtn = CreateActionBtn("👁 Eye", Color.FromArgb(254, 247, 224), Color.FromArgb(180, 100, 0), 64, this.Width - 368);
-            eyeCareBtn.Click += (s, e) => CycleEyeCareMode();
-
-            notesBtn = CreateActionBtn("📝 Notes", Color.FromArgb(235, 235, 245), Color.FromArgb(40, 40, 60), 68, this.Width - 299);
-            notesBtn.Click += (s, e) => OpenSettingsDialog(2);
-
-            settingsBtn = CreateActionBtn("⚙️", Color.FromArgb(241, 243, 244), Color.FromArgb(95, 99, 104), 36, this.Width - 226);
-            settingsBtn.Click += (s, e) => OpenSettingsDialog(0);
-
-            extBtn = CreateActionBtn("🧩 Ext", Color.FromArgb(241, 243, 244), Color.FromArgb(95, 99, 104), 64, this.Width - 185);
-            extBtn.Click += (s, e) => AddNewTab("Chrome Extensions", "https://chromewebstore.google.com");
-
-            addTabBtn = CreateActionBtn("+ Tab", Color.FromArgb(232, 240, 254), Color.FromArgb(26, 115, 232), 56, this.Width - 116);
-            addTabBtn.Click += (s, e) => AddNewTab("New Tab", "about:blank");
-
-            menuBtn = CreateBtn("⋮", this.Width - 54);
-            menuBtn.Anchor = AnchorStyles.Right | AnchorStyles.Top;
-            menuBtn.Click += (s, e) => mainMenu.Show(menuBtn, new Point(0, menuBtn.Height));
-
+            omniboxPanel.Controls.Add(actionsPanel);
             omniboxPanel.Controls.Add(backBtn);
             omniboxPanel.Controls.Add(fwdBtn);
             omniboxPanel.Controls.Add(reloadBtn);
             omniboxPanel.Controls.Add(homeBtn);
             omniboxPanel.Controls.Add(urlBar);
-            omniboxPanel.Controls.Add(shieldBtn);
-            omniboxPanel.Controls.Add(eyeCareBtn);
-            omniboxPanel.Controls.Add(notesBtn);
-            omniboxPanel.Controls.Add(settingsBtn);
-            omniboxPanel.Controls.Add(extBtn);
-            omniboxPanel.Controls.Add(addTabBtn);
-            omniboxPanel.Controls.Add(menuBtn);
 
             headerContainer.Controls.Add(omniboxPanel);
+            headerContainer.Controls.Add(softBanner);
 
             tabControl = new TabControl();
             tabControl.Dock = DockStyle.Fill;
@@ -184,16 +225,20 @@ namespace BlackBrowser
             tabControl.MouseDown += OnTabMouseDown;
             tabControl.SelectedIndexChanged += OnTabChanged;
 
-            this.Controls.Add(tabControl);
             this.Controls.Add(headerContainer);
+            this.Controls.Add(tabControl);
+            headerContainer.SendToBack();
+            tabControl.BringToFront();
 
             this.KeyPreview = true;
             this.KeyDown += OnFormKeyDown;
 
             this.Resize += (s, e) =>
             {
-                if (urlBar != null)
-                    urlBar.Width = Math.Max(200, this.Width - 580);
+                if (urlBar != null && actionsPanel != null)
+                {
+                    urlBar.Width = Math.Max(200, this.Width - actionsPanel.Width - 160);
+                }
 
                 if (this.WindowState == FormWindowState.Minimized)
                 {
@@ -204,20 +249,48 @@ namespace BlackBrowser
                 {
                     ResumeActiveWebView();
                 }
+                this.PerformLayout();
             };
+        }
+
+        public void ShowSoftCommunication(string msg)
+        {
+            if (this.InvokeRequired)
+            {
+                this.Invoke((Action)(() => ShowSoftCommunication(msg)));
+                return;
+            }
+
+            softBannerLabel.Text = msg;
+            bannerTimer.Stop();
+            bannerTimer.Start();
+        }
+
+        private void ToggleCurrentTabBookmark()
+        {
+            WebView2 wv = GetCurrentWebView();
+            if (wv != null && wv.CoreWebView2 != null)
+            {
+                string url = wv.Source != null ? wv.Source.ToString() : "";
+                string title = wv.CoreWebView2.DocumentTitle;
+                bool added = BookmarksManager.ToggleBookmark(title, url);
+
+                if (added)
+                {
+                    starBtn.BackColor = Color.FromArgb(254, 235, 180);
+                    ShowSoftCommunication("⭐ Bookmark Added Locally to Device!");
+                }
+                else
+                {
+                    starBtn.BackColor = Color.FromArgb(254, 247, 224);
+                    ShowSoftCommunication("⭐ Bookmark Removed");
+                }
+            }
         }
 
         private void ShowAdShieldStatus()
         {
-            MessageBox.Show(
-                "🛡️ 3-Layer AdShield Protection Engine Status:\n\n" +
-                "• Total Blocked Ads & Trackers: " + totalBlockedAds + "\n" +
-                "• Network Filtering Layer: Active\n" +
-                "• Injected CSS Hiding Layer: Active\n" +
-                "• 500ms JS Video Ad Fast-Forwarder: Active\n\n" +
-                "Your browsing is 100% ad-free and tracking protected!",
-                "Black Browser — AdShield Protection",
-                MessageBoxButtons.OK, MessageBoxIcon.Information);
+            ShowSoftCommunication("🛡️ AdShield Engine: " + totalBlockedAds + " Ads Blocked • Zero Trackers");
         }
 
         private void OpenSettingsDialog(int initialTab)
@@ -248,14 +321,13 @@ namespace BlackBrowser
             return b;
         }
 
-        private Button CreateActionBtn(string text, Color bg, Color fg, int width, int left)
+        private Button CreateActionBtn(string text, Color bg, Color fg, int width)
         {
             Button b = new Button();
             b.Text = text;
             b.Width = width;
-            b.Height = 28;
-            b.Anchor = AnchorStyles.Right | AnchorStyles.Top;
-            b.Location = new Point(left, 6);
+            b.Height = 26;
+            b.Margin = new Padding(2, 4, 2, 4);
             b.FlatStyle = FlatStyle.Flat;
             b.FlatAppearance.BorderSize = 0;
             b.BackColor = bg;
@@ -267,11 +339,17 @@ namespace BlackBrowser
 
         private void OnDrawTabItem(object sender, DrawItemEventArgs e)
         {
+            if (e.Index < 0 || e.Index >= tabControl.TabPages.Count) return;
+
             TabPage page = tabControl.TabPages[e.Index];
             Rectangle rect = tabControl.GetTabRect(e.Index);
             bool selected = (tabControl.SelectedIndex == e.Index);
+            bool isPrivate = page.Tag != null && (bool)page.Tag == true;
 
-            Color backColor = selected ? Color.FromArgb(255, 255, 255) : Color.FromArgb(230, 233, 238);
+            Color backColor = isPrivate
+                ? (selected ? Color.FromArgb(32, 32, 42) : Color.FromArgb(22, 22, 28))
+                : (selected ? Color.FromArgb(255, 255, 255) : Color.FromArgb(230, 233, 238));
+
             using (SolidBrush b = new SolidBrush(backColor))
             {
                 e.Graphics.FillRectangle(b, rect);
@@ -279,15 +357,18 @@ namespace BlackBrowser
 
             if (selected)
             {
-                using (Pen p = new Pen(Color.FromArgb(26, 115, 232), 2))
+                Color barColor = isPrivate ? Color.FromArgb(160, 90, 240) : Color.FromArgb(26, 115, 232);
+                using (Pen p = new Pen(barColor, 2))
                 {
                     e.Graphics.DrawLine(p, rect.Left, rect.Top, rect.Right, rect.Top);
                 }
             }
 
+            Color textColor = isPrivate ? Color.FromArgb(200, 180, 255) : (selected ? Color.FromArgb(32, 33, 36) : Color.FromArgb(95, 99, 104));
+
             TextRenderer.DrawText(e.Graphics, page.Text, tabControl.Font,
                 new Rectangle(rect.X + 6, rect.Y + 4, rect.Width - 24, rect.Height - 4),
-                selected ? Color.FromArgb(32, 33, 36) : Color.FromArgb(95, 99, 104),
+                textColor,
                 TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
 
             Rectangle closeRect = new Rectangle(rect.Right - 20, rect.Y + (rect.Height - 14) / 2, 14, 14);
@@ -334,7 +415,7 @@ namespace BlackBrowser
                 WebView2 wv = GetCurrentWebView();
                 if (wv != null && wv.CoreWebView2 != null)
                 {
-                    wv.CoreWebView2.NavigateToString(SpeedDialPage.GetHtml(isDarkMode));
+                    wv.CoreWebView2.Navigate(SpeedDialPage.GetSpeedDialFilePath(isDarkMode));
                     urlBar.Text = "";
                     tabControl.SelectedTab.Text = "New Tab";
                 }
@@ -347,8 +428,11 @@ namespace BlackBrowser
             mainMenu.Font = new Font("Segoe UI", 9.5f);
 
             mainMenu.Items.Add("➕ New Tab (Ctrl+T)", null, (s, e) => AddNewTab("New Tab", "about:blank"));
+            mainMenu.Items.Add("🕵️ New Private Tab (Ctrl+Shift+P)", null, (s, e) => AddNewTab("Private Tab", "about:blank", isPrivate: true));
             mainMenu.Items.Add("🏠 Go to Speed Dial Home", null, (s, e) => NavigateCurrentTab("about:blank"));
+            mainMenu.Items.Add("⭐ Local Bookmarks", null, (s, e) => NavigateCurrentTab("black://bookmarks"));
             mainMenu.Items.Add("📜 Local History (Ctrl+H)", null, (s, e) => NavigateCurrentTab("black://history"));
+            mainMenu.Items.Add("📥 Local Downloads (Ctrl+J)", null, (s, e) => NavigateCurrentTab("black://downloads"));
             mainMenu.Items.Add("🛒 Chrome Web Store", null, (s, e) => AddNewTab("Chrome Store", "https://chromewebstore.google.com"));
             mainMenu.Items.Add("🧩 Edge Add-ons Store", null, (s, e) => AddNewTab("Edge Add-ons", "https://microsoftedge.microsoft.com/addons"));
             mainMenu.Items.Add(new ToolStripSeparator());
@@ -364,6 +448,8 @@ namespace BlackBrowser
         private void SetTheme(bool dark)
         {
             isDarkMode = dark;
+            Color defaultBg = isDarkMode ? Color.FromArgb(18, 18, 22) : Color.FromArgb(245, 246, 250);
+
             if (isDarkMode)
             {
                 headerContainer.BackColor = Color.FromArgb(32, 33, 36);
@@ -378,13 +464,20 @@ namespace BlackBrowser
                 omniboxPanel.BackColor = Color.FromArgb(255, 255, 255);
                 urlBar.BackColor = Color.FromArgb(241, 243, 244);
                 urlBar.ForeColor = Color.FromArgb(32, 33, 36);
-                this.BackColor = Color.FromArgb(249, 249, 251);
+                this.BackColor = Color.FromArgb(245, 246, 250);
             }
 
-            WebView2 wv = GetCurrentWebView();
-            if (wv != null && wv.Source != null && wv.Source.ToString() == "about:blank")
+            foreach (TabPage page in tabControl.TabPages)
             {
-                wv.CoreWebView2.NavigateToString(SpeedDialPage.GetHtml(isDarkMode));
+                WebView2 wv = GetWebView(page);
+                if (wv != null)
+                {
+                    wv.DefaultBackgroundColor = defaultBg;
+                    if (wv.CoreWebView2 != null && (wv.Source == null || wv.Source.ToString().EndsWith("speeddial.html") || wv.Source.ToString() == "about:blank"))
+                    {
+                        wv.CoreWebView2.Navigate(SpeedDialPage.GetSpeedDialFilePath(isDarkMode));
+                    }
+                }
             }
         }
 
@@ -402,16 +495,19 @@ namespace BlackBrowser
             {
                 eyeCareBtn.Text = "👁 Warm";
                 eyeCareBtn.BackColor = Color.FromArgb(254, 235, 180);
+                ShowSoftCommunication("👁️ Eye Care Filter: Warm Amber (18%)");
             }
             else if (eyeCareMode == 2)
             {
                 eyeCareBtn.Text = "👁 Dimmed";
                 eyeCareBtn.BackColor = Color.FromArgb(220, 220, 220);
+                ShowSoftCommunication("👁️ Eye Care Filter: Night Dimmer (35%)");
             }
             else
             {
                 eyeCareBtn.Text = "👁 Eye";
                 eyeCareBtn.BackColor = Color.FromArgb(254, 247, 224);
+                ShowSoftCommunication("👁️ Eye Care Filter: Disabled");
             }
         }
 
@@ -428,25 +524,11 @@ namespace BlackBrowser
                     Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                     "black-webview2");
 
-                string chromeUA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 Edg/128.0.0.0";
+                webViewEnv = await CoreWebView2Environment.CreateAsync(null, userDataFolder, null);
+                Log("Environment created successfully with standard WebView2 environment settings");
 
-                var options = new CoreWebView2EnvironmentOptions(
-                    "--disk-cache-size=33554432 " +
-                    "--media-cache-size=33554432 " +
-                    "--renderer-process-limit=1 " +
-                    "--enable-experimental-extension-apis " +
-                    "--allow-legacy-extension-manifests " +
-                    "--user-agent=\"" + chromeUA + "\" " +
-                    "--no-first-run " +
-                    "--disable-sync " +
-                    "--disable-translate " +
-                    "--js-flags=--max-old-space-size=128"
-                );
-
-                webViewEnv = await CoreWebView2Environment.CreateAsync(null, userDataFolder, options);
-                Log("Environment created successfully with full Chrome compatibility User-Agent");
-
-                AddNewTab("New Tab", "about:blank");
+                // Launch YouTube natively in the initial tab!
+                AddNewTab("YouTube", "https://www.youtube.com");
             }
             catch (Exception ex)
             {
@@ -454,27 +536,76 @@ namespace BlackBrowser
             }
         }
 
-        public async void AddNewTab(string title, string url)
+        public async void AddNewTab(string title, string url, bool isPrivate = false)
         {
             try
             {
                 if (webViewEnv == null) return;
 
-                TabPage page = new TabPage(TruncateTitle(title));
-                page.BackColor = isDarkMode ? Color.FromArgb(20, 20, 22) : Color.White;
+                string tabTitle = isPrivate ? "🕵️ Private Tab" : TruncateTitle(title);
+                TabPage page = new TabPage(tabTitle);
+                page.Tag = isPrivate;
+
+                Color defaultBg = isPrivate
+                    ? Color.FromArgb(18, 18, 24)
+                    : (isDarkMode ? Color.FromArgb(18, 18, 22) : Color.FromArgb(245, 246, 250));
+
+                page.BackColor = defaultBg;
 
                 WebView2 wv = new WebView2();
                 wv.Dock = DockStyle.Fill;
+                wv.DefaultBackgroundColor = defaultBg;
                 page.Controls.Add(wv);
                 tabControl.TabPages.Add(page);
                 tabControl.SelectedTab = page;
 
+                tabControl.Invalidate();
+                this.PerformLayout();
+
                 await wv.EnsureCoreWebView2Async(webViewEnv);
+
+                wv.CoreWebView2.ProcessFailed += (s, e) =>
+                {
+                    Log("ProcessFailed: " + e.ProcessFailedKind.ToString());
+                    try { wv.Reload(); } catch { }
+                };
 
                 wv.CoreWebView2.PermissionRequested += (s, e) =>
                 {
                     if (e.PermissionKind == CoreWebView2PermissionKind.Notifications)
                         e.State = CoreWebView2PermissionState.Allow;
+                };
+
+                wv.CoreWebView2.DownloadStarting += (s, e) =>
+                {
+                    try
+                    {
+                        string path = e.ResultFilePath;
+                        string name = !string.IsNullOrEmpty(path) ? Path.GetFileName(path) : "Download";
+                        DownloadsManager.AddDownload(name, path ?? "", 0);
+                        ShowSoftCommunication("📥 Download Started: " + name);
+                    }
+                    catch { }
+                };
+
+                wv.CoreWebView2.ContainsFullScreenElementChanged += (s, e) =>
+                {
+                    this.Invoke((Action)(() =>
+                    {
+                        if (wv.CoreWebView2.ContainsFullScreenElement)
+                        {
+                            headerContainer.Visible = false;
+                            this.FormBorderStyle = FormBorderStyle.None;
+                            this.WindowState = FormWindowState.Maximized;
+                        }
+                        else
+                        {
+                            headerContainer.Visible = true;
+                            this.FormBorderStyle = FormBorderStyle.Sizable;
+                            this.WindowState = FormWindowState.Normal;
+                        }
+                        this.PerformLayout();
+                    }));
                 };
 
                 AdShieldEngine.AttachAdShield(wv, () =>
@@ -490,18 +621,31 @@ namespace BlackBrowser
                     {
                         e.Cancel = true;
                         wv.CoreWebView2.NavigateToString(HistoryManager.GetHistoryHtml(isDarkMode));
-                        if (tabControl.SelectedTab == page)
-                        {
-                            urlBar.Text = "black://history";
-                            page.Text = "Local History";
-                        }
+                        if (tabControl.SelectedTab == page) { urlBar.Text = "black://history"; page.Text = "Local History"; }
+                        return;
+                    }
+
+                    if (e.Uri.Equals("black://bookmarks", StringComparison.OrdinalIgnoreCase))
+                    {
+                        e.Cancel = true;
+                        wv.CoreWebView2.NavigateToString(BookmarksManager.GetBookmarksHtml(isDarkMode));
+                        if (tabControl.SelectedTab == page) { urlBar.Text = "black://bookmarks"; page.Text = "Local Bookmarks"; }
+                        return;
+                    }
+
+                    if (e.Uri.Equals("black://downloads", StringComparison.OrdinalIgnoreCase) ||
+                        e.Uri.Equals("about:downloads", StringComparison.OrdinalIgnoreCase))
+                    {
+                        e.Cancel = true;
+                        wv.CoreWebView2.NavigateToString(DownloadsManager.GetDownloadsHtml(isDarkMode));
+                        if (tabControl.SelectedTab == page) { urlBar.Text = "black://downloads"; page.Text = "Local Downloads"; }
                         return;
                     }
 
                     if (tabControl.SelectedTab == page)
                     {
                         string uriStr = e.Uri;
-                        urlBar.Text = uriStr == "about:blank" ? "" : uriStr;
+                        urlBar.Text = (uriStr == "about:blank" || uriStr.EndsWith("speeddial.html")) ? "" : uriStr;
                     }
                 };
 
@@ -509,34 +653,47 @@ namespace BlackBrowser
                 {
                     if (tabControl.SelectedTab == page)
                     {
-                        string uriStr = wv.Source.ToString();
-                        urlBar.Text = uriStr == "about:blank" ? "" : uriStr;
-                        page.Text = string.IsNullOrEmpty(wv.CoreWebView2.DocumentTitle)
-                            ? "Tab" : TruncateTitle(wv.CoreWebView2.DocumentTitle);
+                        string uriStr = wv.Source != null ? wv.Source.ToString() : "";
+                        urlBar.Text = (uriStr == "about:blank" || uriStr.EndsWith("speeddial.html")) ? "" : uriStr;
+
+                        string pageName = string.IsNullOrEmpty(wv.CoreWebView2.DocumentTitle) || wv.CoreWebView2.DocumentTitle == "speeddial.html"
+                            ? "New Tab" : TruncateTitle(wv.CoreWebView2.DocumentTitle);
+
+                        page.Text = isPrivate ? "🕵️ " + pageName : pageName;
                         tabControl.Invalidate();
                         UpdateNavButtons();
                     }
 
-                    // Record to 100% Local History
-                    HistoryManager.AddVisit(wv.CoreWebView2.DocumentTitle, wv.Source.ToString());
+                    if (!isPrivate && wv.Source != null && !wv.Source.ToString().EndsWith("speeddial.html"))
+                    {
+                        HistoryManager.AddVisit(wv.CoreWebView2.DocumentTitle, wv.Source.ToString());
+                    }
                 };
 
                 wv.CoreWebView2.SourceChanged += (s, e) =>
                 {
                     if (tabControl.SelectedTab == page)
                     {
-                        string uriStr = wv.Source.ToString();
-                        urlBar.Text = uriStr == "about:blank" ? "" : uriStr;
+                        string uriStr = wv.Source != null ? wv.Source.ToString() : "";
+                        urlBar.Text = (uriStr == "about:blank" || uriStr.EndsWith("speeddial.html")) ? "" : uriStr;
                     }
                 };
 
                 if (url == "about:blank" || string.IsNullOrEmpty(url) || url == "black://home")
                 {
-                    wv.CoreWebView2.NavigateToString(SpeedDialPage.GetHtml(isDarkMode));
+                    wv.CoreWebView2.Navigate(SpeedDialPage.GetSpeedDialFilePath(isDarkMode));
                 }
                 else if (url == "black://history" || url == "about:history")
                 {
                     wv.CoreWebView2.NavigateToString(HistoryManager.GetHistoryHtml(isDarkMode));
+                }
+                else if (url == "black://bookmarks")
+                {
+                    wv.CoreWebView2.NavigateToString(BookmarksManager.GetBookmarksHtml(isDarkMode));
+                }
+                else if (url == "black://downloads" || url == "about:downloads")
+                {
+                    wv.CoreWebView2.NavigateToString(DownloadsManager.GetDownloadsHtml(isDarkMode));
                 }
                 else
                 {
@@ -551,6 +708,7 @@ namespace BlackBrowser
 
         private string TruncateTitle(string title)
         {
+            if (string.IsNullOrEmpty(title)) return "Tab";
             if (title.Length > 18) return title.Substring(0, 15) + "...";
             return title;
         }
@@ -580,10 +738,18 @@ namespace BlackBrowser
         private void OnTabChanged(object sender, EventArgs e)
         {
             WebView2 wv = GetCurrentWebView();
-            if (wv != null && wv.CoreWebView2 != null)
+            if (wv != null && wv.CoreWebView2 != null && wv.Source != null)
             {
                 string uriStr = wv.Source.ToString();
-                urlBar.Text = uriStr == "about:blank" ? "" : uriStr;
+                urlBar.Text = (uriStr == "about:blank" || uriStr.EndsWith("speeddial.html")) ? "" : uriStr;
+                UpdateNavButtons();
+
+                starBtn.BackColor = BookmarksManager.IsBookmarked(uriStr)
+                    ? Color.FromArgb(254, 235, 180)
+                    : Color.FromArgb(254, 247, 224);
+            }
+            else
+            {
                 UpdateNavButtons();
             }
         }
@@ -596,6 +762,11 @@ namespace BlackBrowser
                 backBtn.Enabled = wv.CanGoBack;
                 fwdBtn.Enabled = wv.CanGoForward;
             }
+            else
+            {
+                backBtn.Enabled = false;
+                fwdBtn.Enabled = false;
+            }
         }
 
         private void NavigateCurrentTab(string input)
@@ -605,7 +776,7 @@ namespace BlackBrowser
             {
                 if (string.IsNullOrWhiteSpace(input) || input == "about:blank" || input.Equals("black://home", StringComparison.OrdinalIgnoreCase))
                 {
-                    wv.CoreWebView2.NavigateToString(SpeedDialPage.GetHtml(isDarkMode));
+                    wv.CoreWebView2.Navigate(SpeedDialPage.GetSpeedDialFilePath(isDarkMode));
                     urlBar.Text = "";
                     if (tabControl.SelectedTab != null) tabControl.SelectedTab.Text = "New Tab";
                     return;
@@ -617,6 +788,23 @@ namespace BlackBrowser
                     wv.CoreWebView2.NavigateToString(HistoryManager.GetHistoryHtml(isDarkMode));
                     urlBar.Text = "black://history";
                     if (tabControl.SelectedTab != null) tabControl.SelectedTab.Text = "Local History";
+                    return;
+                }
+
+                if (input.Equals("black://bookmarks", StringComparison.OrdinalIgnoreCase))
+                {
+                    wv.CoreWebView2.NavigateToString(BookmarksManager.GetBookmarksHtml(isDarkMode));
+                    urlBar.Text = "black://bookmarks";
+                    if (tabControl.SelectedTab != null) tabControl.SelectedTab.Text = "Local Bookmarks";
+                    return;
+                }
+
+                if (input.Equals("black://downloads", StringComparison.OrdinalIgnoreCase) ||
+                    input.Equals("about:downloads", StringComparison.OrdinalIgnoreCase))
+                {
+                    wv.CoreWebView2.NavigateToString(DownloadsManager.GetDownloadsHtml(isDarkMode));
+                    urlBar.Text = "black://downloads";
+                    if (tabControl.SelectedTab != null) tabControl.SelectedTab.Text = "Local Downloads";
                     return;
                 }
 
@@ -719,6 +907,11 @@ namespace BlackBrowser
                 e.SuppressKeyPress = true;
                 AddNewTab("New Tab", "about:blank");
             }
+            else if (e.Control && e.Shift && e.KeyCode == Keys.P)
+            {
+                e.SuppressKeyPress = true;
+                AddNewTab("Private Tab", "about:blank", isPrivate: true);
+            }
             else if (e.Control && e.KeyCode == Keys.W)
             {
                 e.SuppressKeyPress = true;
@@ -749,6 +942,11 @@ namespace BlackBrowser
             {
                 e.SuppressKeyPress = true;
                 NavigateCurrentTab("black://history");
+            }
+            else if (e.Control && e.KeyCode == Keys.J)
+            {
+                e.SuppressKeyPress = true;
+                NavigateCurrentTab("black://downloads");
             }
             else if (e.Control && e.Shift && e.KeyCode == Keys.E)
             {
@@ -826,6 +1024,7 @@ namespace BlackBrowser
                 if (mainMenu        != null) mainMenu.Dispose();
                 if (trayIcon        != null) { trayIcon.Visible = false; trayIcon.Dispose(); }
                 if (gcTimer         != null) gcTimer.Dispose();
+                if (bannerTimer     != null) bannerTimer.Dispose();
             }
             base.Dispose(disposing);
         }

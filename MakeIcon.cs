@@ -1,71 +1,83 @@
 using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.IO;
 
-namespace IconTool
+class MakeIcon
 {
-    class Program
+    static void Main()
     {
-        static void Main(string[] args)
+        string inputPath = @"C:\Users\shiva\.gemini\antigravity-cli\brain\9b2d0d52-3373-4761-b4e8-152d25777029\futuristic_black_browser_logo_1785499356692.jpg";
+        string outputIco = @"C:\Users\shiva\Documents\Black-Noir\icon.ico";
+        string outputPng = @"C:\Users\shiva\Documents\Black-Noir\icon.png";
+
+        if (!File.Exists(inputPath))
         {
-            string pngPath = @"C:\Users\shiva\Documents\Black-Noir\icon.png";
-            string icoPath = @"C:\Users\shiva\Documents\Black-Noir\icon.ico";
+            Console.WriteLine("Input image not found: " + inputPath);
+            return;
+        }
 
-            using (Bitmap master = new Bitmap(pngPath))
+        using (Bitmap src = new Bitmap(inputPath))
+        {
+            src.Save(outputPng, ImageFormat.Png);
+
+            int[] sizes = new int[] { 256, 128, 96, 64, 48, 32, 16 };
+
+            using (FileStream fs = new FileStream(outputIco, FileMode.Create, FileAccess.Write))
+            using (BinaryWriter bw = new BinaryWriter(fs))
             {
-                int[] sizes = new int[] { 256, 128, 96, 64, 48, 32, 16 };
-                using (MemoryStream ms = new MemoryStream())
+                bw.Write((ushort)0); // Reserved
+                bw.Write((ushort)1); // Type: ICO
+                bw.Write((ushort)sizes.Length); // Count
+
+                int offset = 6 + (16 * sizes.Length);
+
+                byte[][] pngBuffers = new byte[sizes.Length][];
+
+                for (int i = 0; i < sizes.Length; i++)
                 {
-                    BinaryWriter bw = new BinaryWriter(ms);
-                    bw.Write((short)0); // Reserved
-                    bw.Write((short)1); // Type: 1 = ICO
-                    bw.Write((short)sizes.Length); // Image Count
-
-                    int offset = 6 + (16 * sizes.Length);
-                    byte[][] pngBytes = new byte[sizes.Length][];
-
-                    for (int i = 0; i < sizes.Length; i++)
+                    int sz = sizes[i];
+                    using (Bitmap resized = new Bitmap(sz, sz, PixelFormat.Format32bppArgb))
                     {
-                        int sz = sizes[i];
-                        using (Bitmap bmp = new Bitmap(sz, sz))
+                        using (Graphics g = Graphics.FromImage(resized))
                         {
-                            using (Graphics g = Graphics.FromImage(bmp))
-                            {
-                                g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                                g.SmoothingMode = SmoothingMode.HighQuality;
-                                g.PixelOffsetMode = PixelOffsetMode.HighQuality;
-                                g.DrawImage(master, 0, 0, sz, sz);
-                            }
-                            using (MemoryStream imgMs = new MemoryStream())
-                            {
-                                bmp.Save(imgMs, System.Drawing.Imaging.ImageFormat.Png);
-                                pngBytes[i] = imgMs.ToArray();
-                            }
+                            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                            g.SmoothingMode = SmoothingMode.HighQuality;
+                            g.PixelOffsetMode = PixelOffsetMode.HighQuality;
+                            g.CompositingQuality = CompositingQuality.HighQuality;
+                            g.DrawImage(src, 0, 0, sz, sz);
                         }
 
-                        bw.Write((byte)(sz >= 256 ? 0 : sz));
-                        bw.Write((byte)(sz >= 256 ? 0 : sz));
-                        bw.Write((byte)0);
-                        bw.Write((byte)0);
-                        bw.Write((short)1);
-                        bw.Write((short)32);
-                        bw.Write((int)pngBytes[i].Length);
-                        bw.Write((int)offset);
-
-                        offset += pngBytes[i].Length;
+                        using (MemoryStream ms = new MemoryStream())
+                        {
+                            resized.Save(ms, ImageFormat.Png);
+                            pngBuffers[i] = ms.ToArray();
+                        }
                     }
 
-                    for (int i = 0; i < sizes.Length; i++)
-                    {
-                        bw.Write(pngBytes[i]);
-                    }
+                    int bWidth = sz >= 256 ? 0 : sz;
+                    int bHeight = sz >= 256 ? 0 : sz;
 
-                    bw.Flush();
-                    File.WriteAllBytes(icoPath, ms.ToArray());
+                    bw.Write((byte)bWidth);
+                    bw.Write((byte)bHeight);
+                    bw.Write((byte)0); // Colors
+                    bw.Write((byte)0); // Reserved
+                    bw.Write((ushort)1); // Planes
+                    bw.Write((ushort)32); // BPP
+                    bw.Write((uint)pngBuffers[i].Length); // Size
+                    bw.Write((uint)offset); // Offset
+
+                    offset += pngBuffers[i].Length;
+                }
+
+                for (int i = 0; i < sizes.Length; i++)
+                {
+                    bw.Write(pngBuffers[i]);
                 }
             }
-            Console.WriteLine("Generated true 256x256 multi-resolution icon.ico successfully!");
+
+            Console.WriteLine("Master Icon ICO successfully generated at: " + outputIco);
         }
     }
 }
