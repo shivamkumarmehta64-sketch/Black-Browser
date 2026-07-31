@@ -4,39 +4,60 @@ namespace BlackBrowser
     {
         public static string GetHtml(bool isDarkMode)
         {
-            string bg = isDarkMode ? "#121216" : "linear-gradient(180deg,#ffffff 0%,#f5f5f7 100%)";
-            string textColor = isDarkMode ? "#ffffff" : "#1d1d1f";
-            string searchBg = isDarkMode ? "#202025" : "#ffffff";
-            string searchBorder = isDarkMode ? "#303038" : "#dfe1e5";
+            string bg = isDarkMode
+                ? "radial-gradient(circle at 50% 20%, #1c1c24 0%, #101014 100%)"
+                : "radial-gradient(circle at 50% 20%, #ffffff 0%, #f4f6fc 100%)";
+
+            string textColor = isDarkMode ? "#ffffff" : "#1d1d21";
+            string subTextColor = isDarkMode ? "#9a9ab0" : "#6e6e82";
+            string searchBg = isDarkMode ? "rgba(32, 32, 42, 0.85)" : "rgba(255, 255, 255, 0.95)";
+            string searchBorder = isDarkMode ? "rgba(255, 255, 255, 0.12)" : "rgba(0, 0, 0, 0.08)";
+            string cardBg = isDarkMode ? "rgba(255, 255, 255, 0.04)" : "rgba(255, 255, 255, 0.85)";
+            string cardBorder = isDarkMode ? "rgba(255, 255, 255, 0.08)" : "rgba(255, 255, 255, 0.6)";
 
             return @"<!DOCTYPE html>
 <html>
 <head>
 <meta charset='utf-8'>
+<link rel='preconnect' href='https://fonts.googleapis.com'>
+<link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>
+<link href='https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap' rel='stylesheet'>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;background:" + bg + @";color:" + textColor + @";display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:40px 20px;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+body{font-family:'Outfit','Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:" + bg + @";color:" + textColor + @";display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:40px 20px;overflow-x:hidden;-webkit-font-smoothing:antialiased}
 
-.clock-container{text-align:center;margin-bottom:28px}
-.time-display{font-size:62px;font-weight:300;letter-spacing:-1.5px;color:#1a73e8;user-select:none;line-height:1}
-.greeting{font-size:20px;font-weight:500;margin-top:10px;color:#80868b}
+/* Header & Clock */
+.clock-container{text-align:center;margin-bottom:32px;animation:fadeIn 0.6s ease}
+.time-display{font-size:68px;font-weight:300;letter-spacing:-2px;background:linear-gradient(135deg,#1a73e8 0%,#0b57d0 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;user-select:none;line-height:1.1;filter:drop-shadow(0 4px 12px rgba(26,115,232,0.15))}
+.greeting{font-size:21px;font-weight:500;margin-top:10px;color:" + subTextColor + @";letter-spacing:-0.2px}
+.ai-status-badge{display:inline-flex;align-items:center;gap:8px;margin-top:14px;padding:6px 16px;border-radius:20px;background:" + (isDarkMode ? "rgba(26,115,232,0.15)" : "rgba(26,115,232,0.08)") + @";color:#1a73e8;font-size:12.5px;font-weight:600;border:1px solid rgba(26,115,232,0.2)}
 
-.search-container{width:100%;max-width:620px;margin-bottom:44px}
-.search-box{display:flex;align-items:center;width:100%;height:54px;padding:0 22px;border-radius:27px;background:" + searchBg + @";border:1.5px solid " + searchBorder + @";box-shadow:0 4px 20px rgba(0,0,0,0.06);transition:all .25s ease}
-.search-box:hover,.search-box:focus-within{box-shadow:0 8px 30px rgba(26,115,232,0.22);border-color:#1a73e8}
-.search-icon{color:#1a73e8;font-size:19px;margin-right:14px}
-.search-box input{flex:1;background:transparent;border:none;outline:none;color:" + textColor + @";font-size:16.5px;font-weight:400}
-.search-box button{background:linear-gradient(135deg,#1a73e8 0%,#0b57d0 100%);border:none;color:#ffffff;font-weight:600;font-size:14.5px;cursor:pointer;padding:0 24px;border-radius:20px;height:40px;box-shadow:0 3px 12px rgba(26,115,232,0.3);transition:all .15s ease}
-.search-box button:hover{transform:scale(1.03);box-shadow:0 6px 18px rgba(26,115,232,0.4)}
+/* Search Bar */
+.search-container{width:100%;max-width:640px;margin-bottom:44px;animation:fadeIn 0.8s ease}
+.search-box{display:flex;align-items:center;width:100%;height:56px;padding:0 24px;border-radius:28px;background:" + searchBg + @";border:1.5px solid " + searchBorder + @";box-shadow:0 8px 32px rgba(0,0,0,0.06);backdrop-filter:blur(20px);transition:all .25s cubic-bezier(0.4,0,0.2,1)}
+.search-box:hover,.search-box:focus-within{box-shadow:0 12px 40px rgba(26,115,232,0.24);border-color:#1a73e8;transform:translateY(-1px)}
+.search-icon{color:#1a73e8;font-size:20px;margin-right:14px}
+.search-box input{flex:1;background:transparent;border:none;outline:none;color:" + textColor + @";font-size:16.5px;font-weight:400;font-family:'Inter',sans-serif}
+.search-box button{background:linear-gradient(135deg,#1a73e8 0%,#0b57d0 100%);border:none;color:#ffffff;font-weight:600;font-size:14.5px;cursor:pointer;padding:0 26px;border-radius:22px;height:42px;box-shadow:0 4px 14px rgba(26,115,232,0.35);transition:all .15s ease}
+.search-box button:hover{transform:scale(1.04);box-shadow:0 6px 20px rgba(26,115,232,0.45)}
 
-.dials-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;width:100%;max-width:620px}
-.dial{display:flex;flex-direction:column;align-items:center;gap:12px;padding:18px;border-radius:18px;background:" + (isDarkMode ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.9)") + @";border:1px solid " + (isDarkMode ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)") + @";backdrop-filter:blur(16px);cursor:pointer;transition:all .2s ease;text-decoration:none;color:" + textColor + @";box-shadow:0 2px 10px rgba(0,0,0,0.04)}
-.dial:hover{transform:translateY(-5px) scale(1.04);border-color:#1a73e8;box-shadow:0 14px 34px rgba(26,115,232,0.18)}
-.dial-icon{width:54px;height:54px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:23px;font-weight:700;box-shadow:0 2px 10px rgba(0,0,0,0.08);transition:transform .2s ease}
-.dial:hover .dial-icon{transform:scale(1.08)}
-.dial-label{font-size:13px;font-weight:600}
+/* Speed Dials Grid */
+.dials-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;width:100%;max-width:640px;animation:fadeIn 1s ease}
+.dial{display:flex;flex-direction:column;align-items:center;gap:12px;padding:20px;border-radius:20px;background:" + cardBg + @";border:1px solid " + cardBorder + @";backdrop-filter:blur(20px);cursor:pointer;transition:all .22s cubic-bezier(0.4,0,0.2,1);text-decoration:none;color:" + textColor + @";box-shadow:0 4px 16px rgba(0,0,0,0.03)}
+.dial:hover{transform:translateY(-6px) scale(1.04);border-color:#1a73e8;box-shadow:0 16px 40px rgba(26,115,232,0.2)}
+.dial-icon{width:56px;height:56px;border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,0.08);transition:transform .22s ease}
+.dial:hover .dial-icon{transform:scale(1.1)}
+.dial-label{font-size:13.5px;font-weight:600;letter-spacing:-0.1px}
 
-.footer-note{margin-top:52px;font-size:12.5px;color:#80868b;display:flex;align-items:center;gap:18px;background:" + (isDarkMode ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.03)") + @";padding:10px 24px;border-radius:20px}
+/* Feature Shortcuts Control Bar */
+.features-bar{display:flex;align-items:center;justify-content:center;gap:16px;width:100%;max-width:640px;margin-top:36px;animation:fadeIn 1.2s ease}
+.feature-pill{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:22px;background:" + cardBg + @";border:1px solid " + cardBorder + @";backdrop-filter:blur(16px);color:" + textColor + @";font-size:13px;font-weight:600;cursor:pointer;transition:all .2s ease;text-decoration:none;box-shadow:0 2px 10px rgba(0,0,0,0.03)}
+.feature-pill:hover{transform:translateY(-2px);border-color:#1a73e8;box-shadow:0 8px 24px rgba(26,115,232,0.18);color:#1a73e8}
+
+/* Footer Status */
+.footer-note{margin-top:44px;font-size:12.5px;color:" + subTextColor + @";display:flex;align-items:center;gap:18px;background:" + (isDarkMode ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.03)") + @";padding:10px 24px;border-radius:20px}
+
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 </style>
 </head>
 <body>
@@ -44,6 +65,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubunt
 <div class='clock-container'>
   <div class='time-display' id='clock'>12:00 PM</div>
   <div class='greeting' id='greeting'>Welcome to Black Browser</div>
+  <div class='ai-status-badge'>✨ AI Optimized • System Performance Peak</div>
 </div>
 
 <form class='search-container' action='https://www.google.com/search' method='get'>
@@ -65,12 +87,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubunt
   <a class='dial' href='https://microsoftedge.microsoft.com/addons'><div class='dial-icon' style='background:#e8f0fe;color:#1a73e8'>🧩</div><div class='dial-label'>Edge Add-ons</div></a>
 </div>
 
+<div class='features-bar'>
+  <a class='feature-pill' href='https://chatgpt.com'>🤖 ChatGPT AI</a>
+  <a class='feature-pill' href='https://chromewebstore.google.com'>🧩 Extensions</a>
+  <a class='feature-pill' href='https://myactivity.google.com'>📜 History</a>
+  <a class='feature-pill' href='https://microsoftedge.microsoft.com/addons'>🛒 Edge Store</a>
+</div>
+
 <div class='footer-note'>
   <span>🔒 3-Layer Ad Shield Active</span>
   <span>•</span>
   <span>👁️ Eye Care Ready</span>
   <span>•</span>
-  <span>⚡ ~40MB Tray RAM</span>
+  <span>⚡ ~40MB RAM</span>
 </div>
 
 <script>
@@ -81,9 +110,9 @@ function updateClock() {
   var ampm = h >= 12 ? 'PM' : 'AM';
   
   var greet = 'Welcome to Black Browser';
-  if (h < 12) greet = 'Good Morning — Welcome to Black';
-  else if (h < 18) greet = 'Good Afternoon — Welcome to Black';
-  else greet = 'Good Evening — Welcome to Black';
+  if (h < 12) greet = 'Good Morning, Shiva — System Optimal';
+  else if (h < 18) greet = 'Good Afternoon, Shiva — System Optimal';
+  else greet = 'Good Evening, Shiva — System Optimal';
 
   h = h % 12; h = h ? h : 12;
   m = m < 10 ? '0' + m : m;
