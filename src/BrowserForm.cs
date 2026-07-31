@@ -306,6 +306,11 @@ namespace BlackBrowser
             if (wv != null && wv.CoreWebView2 != null)
             {
                 string url = wv.Source != null ? wv.Source.ToString() : "";
+                if (string.IsNullOrWhiteSpace(url) || url == "about:blank" || url.StartsWith("black://") || url.EndsWith("speeddial.html"))
+                {
+                    NavigateCurrentTab("black://bookmarks");
+                    return;
+                }
                 string title = wv.CoreWebView2.DocumentTitle;
                 bool added = BookmarksManager.ToggleBookmark(title, url);
 
@@ -333,7 +338,8 @@ namespace BlackBrowser
                 isDarkMode ? 1 : 0,
                 eyeCareMode,
                 (themeIndex) => SetTheme(themeIndex == 1),
-                (eyeCareIndex) => SetEyeCareMode(eyeCareIndex)))
+                (eyeCareIndex) => SetEyeCareMode(eyeCareIndex),
+                initialTab))
             {
                 sf.ShowDialog(this);
             }

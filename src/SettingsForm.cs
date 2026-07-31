@@ -23,7 +23,7 @@ namespace BlackBrowser
         private Action<int> onEyeCareChanged;
         private string notesPath;
 
-        public SettingsForm(int currentTheme, int currentEyeCare, Action<int> themeCallback, Action<int> eyeCareCallback)
+        public SettingsForm(int currentTheme, int currentEyeCare, Action<int> themeCallback, Action<int> eyeCareCallback, int initialTab = 0)
         {
             this.onThemeChanged = themeCallback;
             this.onEyeCareChanged = eyeCareCallback;
@@ -43,6 +43,10 @@ namespace BlackBrowser
             this.ForeColor = Color.White;
 
             InitializeComponents(currentTheme, currentEyeCare);
+            if (initialTab >= 0 && initialTab < tabControl.TabPages.Count)
+            {
+                tabControl.SelectedIndex = initialTab;
+            }
             LoadNotes();
         }
 
