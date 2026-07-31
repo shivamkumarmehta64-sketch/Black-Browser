@@ -527,8 +527,8 @@ namespace BlackBrowser
                 webViewEnv = await CoreWebView2Environment.CreateAsync(null, userDataFolder, null);
                 Log("Environment created successfully with standard WebView2 environment settings");
 
-                // Launch YouTube natively in the initial tab!
-                AddNewTab("YouTube", "https://www.youtube.com");
+                // Launch Home / Speed Dial page in the initial tab
+                AddNewTab("New Tab", "black://home");
             }
             catch (Exception ex)
             {
