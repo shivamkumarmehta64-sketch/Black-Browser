@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -48,6 +49,7 @@ namespace BlackBrowser
         private CoreWebView2Environment webViewEnv;
         private int totalBlockedAds = 0;
         private string logPath;
+        private Stack<Tuple<string, string>> closedTabStack = new Stack<Tuple<string, string>>();
 
         public BrowserForm()
         {
@@ -457,6 +459,8 @@ namespace BlackBrowser
                 }
             });
 
+            tabContextMenu.Items.Add("↩️ Re-open Closed Tab (Ctrl+Shift+T)", null, (s, e) => ReopenLastClosedTab());
+
             tabContextMenu.Items.Add("🔊 Mute / Unmute Tab", null, (s, e) =>
             {
                 if (rightClickedTab != null)
@@ -519,10 +523,19 @@ namespace BlackBrowser
         {
             if (index < 0 || index >= tabControl.TabPages.Count) return;
 
+            TabPage page = tabControl.TabPages[index];
+            WebView2 wv = GetWebView(page);
+            if (wv != null && wv.Source != null)
+            {
+                string u = wv.Source.ToString();
+                if (!string.IsNullOrEmpty(u) && u != "about:blank" && !u.EndsWith("speeddial.html"))
+                {
+                    closedTabStack.Push(Tuple.Create(page.Text, u));
+                }
+            }
+
             if (tabControl.TabPages.Count > 1)
             {
-                TabPage page = tabControl.TabPages[index];
-                WebView2 wv = GetWebView(page);
                 if (wv != null)
                 {
                     try { if (wv.CoreWebView2 != null) wv.CoreWebView2.Stop(); } catch { }
@@ -533,13 +546,26 @@ namespace BlackBrowser
             }
             else
             {
-                WebView2 wv = GetCurrentWebView();
                 if (wv != null && wv.CoreWebView2 != null)
                 {
                     wv.CoreWebView2.Navigate(SpeedDialPage.GetSpeedDialFilePath(isDarkMode));
                     urlBar.Text = "";
                     tabControl.SelectedTab.Text = "New Tab";
                 }
+            }
+        }
+
+        private void ReopenLastClosedTab()
+        {
+            if (closedTabStack.Count > 0)
+            {
+                var last = closedTabStack.Pop();
+                AddNewTab(last.Item1, last.Item2);
+                ShowSoftCommunication("↩️ Restored Closed Tab: " + last.Item1);
+            }
+            else
+            {
+                ShowSoftCommunication("⚠️ No closed tabs to restore");
             }
         }
 
@@ -720,6 +746,57 @@ namespace BlackBrowser
                 {
                     if (e.PermissionKind == CoreWebView2PermissionKind.Notifications)
                         e.State = CoreWebView2PermissionState.Allow;
+                };
+
+                try { wv.CoreWebView2.Settings.AreDevToolsEnabled = true; } catch { }
+
+                wv.CoreWebView2.ContextMenuRequested += (s, e) =>
+                {
+                    try
+                    {
+                        string selText = e.ContextMenuTarget.SelectionText;
+                        if (!string.IsNullOrWhiteSpace(selText))
+                        {
+                            var searchItem = wv.CoreWebView2.Environment.CreateContextMenuItem(
+                                "🔍 Search Google for \"" + (selText.Length > 18 ? selText.Substring(0, 15) + "..." : selText) + "\"",
+                                null, CoreWebView2ContextMenuItemKind.Command);
+
+                            searchItem.CustomItemSelected += (cs, ce) =>
+                            {
+                                this.BeginInvoke((Action)(() =>
+                                {
+                                    AddNewTab("Google Search", "https://www.google.com/search?q=" + Uri.EscapeDataString(selText), isPrivate);
+                                }));
+                            };
+                            e.MenuItems.Insert(0, searchItem);
+                        }
+
+                        var sourceItem = wv.CoreWebView2.Environment.CreateContextMenuItem(
+                            "📜 View Page Source (Ctrl+U)", null, CoreWebView2ContextMenuItemKind.Command);
+
+                        sourceItem.CustomItemSelected += (cs, ce) =>
+                        {
+                            string currUrl = wv.Source != null ? wv.Source.ToString() : "";
+                            if (!string.IsNullOrEmpty(currUrl) && !currUrl.StartsWith("view-source:"))
+                            {
+                                this.BeginInvoke((Action)(() =>
+                                {
+                                    AddNewTab("Source", "view-source:" + currUrl, isPrivate);
+                                }));
+                            }
+                        };
+                        e.MenuItems.Add(sourceItem);
+
+                        var inspectItem = wv.CoreWebView2.Environment.CreateContextMenuItem(
+                            "🛠️ Inspect Element (F12)", null, CoreWebView2ContextMenuItemKind.Command);
+
+                        inspectItem.CustomItemSelected += (cs, ce) =>
+                        {
+                            try { wv.CoreWebView2.OpenDevToolsWindow(); } catch { }
+                        };
+                        e.MenuItems.Add(inspectItem);
+                    }
+                    catch { }
                 };
 
                 wv.CoreWebView2.DownloadStarting += (s, e) =>
@@ -1172,7 +1249,12 @@ namespace BlackBrowser
 
         private void OnFormKeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Control && e.KeyCode == Keys.T)
+            if (e.Control && e.Shift && e.KeyCode == Keys.T)
+            {
+                e.SuppressKeyPress = true;
+                ReopenLastClosedTab();
+            }
+            else if (e.Control && e.KeyCode == Keys.T)
             {
                 e.SuppressKeyPress = true;
                 AddNewTab("New Tab", "about:blank");
@@ -1181,6 +1263,65 @@ namespace BlackBrowser
             {
                 e.SuppressKeyPress = true;
                 CloseCurrentTab();
+            }
+            else if (e.Control && (e.KeyCode == Keys.Oemplus || e.KeyCode == Keys.Add))
+            {
+                e.SuppressKeyPress = true;
+                WebView2 wv = GetCurrentWebView();
+                if (wv != null)
+                {
+                    wv.ZoomFactor = Math.Min(5.0, wv.ZoomFactor + 0.1);
+                    ShowSoftCommunication("🔍 Zoom: " + (int)(wv.ZoomFactor * 100) + "%");
+                }
+            }
+            else if (e.Control && (e.KeyCode == Keys.OemMinus || e.KeyCode == Keys.Subtract))
+            {
+                e.SuppressKeyPress = true;
+                WebView2 wv = GetCurrentWebView();
+                if (wv != null)
+                {
+                    wv.ZoomFactor = Math.Max(0.25, wv.ZoomFactor - 0.1);
+                    ShowSoftCommunication("🔍 Zoom: " + (int)(wv.ZoomFactor * 100) + "%");
+                }
+            }
+            else if (e.Control && (e.KeyCode == Keys.D0 || e.KeyCode == Keys.NumPad0))
+            {
+                e.SuppressKeyPress = true;
+                WebView2 wv = GetCurrentWebView();
+                if (wv != null)
+                {
+                    wv.ZoomFactor = 1.0;
+                    ShowSoftCommunication("🔍 Zoom Reset: 100%");
+                }
+            }
+            else if (e.Control && e.KeyCode == Keys.U)
+            {
+                e.SuppressKeyPress = true;
+                WebView2 wv = GetCurrentWebView();
+                if (wv != null && wv.Source != null)
+                {
+                    string currUrl = wv.Source.ToString();
+                    if (!string.IsNullOrEmpty(currUrl) && !currUrl.StartsWith("view-source:"))
+                        AddNewTab("Source", "view-source:" + currUrl);
+                }
+            }
+            else if (e.Control && e.KeyCode == Keys.P)
+            {
+                e.SuppressKeyPress = true;
+                WebView2 wv = GetCurrentWebView();
+                if (wv != null && wv.CoreWebView2 != null)
+                {
+                    try { wv.CoreWebView2.ShowPrintUI(CoreWebView2PrintDialogKind.Browser); } catch { }
+                }
+            }
+            else if (e.KeyCode == Keys.F12)
+            {
+                e.SuppressKeyPress = true;
+                WebView2 wv = GetCurrentWebView();
+                if (wv != null && wv.CoreWebView2 != null)
+                {
+                    try { wv.CoreWebView2.OpenDevToolsWindow(); } catch { }
+                }
             }
             else if (e.Control && e.KeyCode == Keys.Tab)
             {
