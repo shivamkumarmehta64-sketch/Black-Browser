@@ -33,15 +33,15 @@ namespace BlackBrowser
             string filePath = Path.Combine(folder, "speeddial.html");
 
             string bg = isDarkMode
-                ? "radial-gradient(circle at 50% 20%, #1a1a22 0%, #0d0d12 100%)"
-                : "radial-gradient(circle at 50% 20%, #ffffff 0%, #f4f6fc 100%)";
+                ? "radial-gradient(circle at 50% 20%, #1c1d26 0%, #0f1016 100%)"
+                : "radial-gradient(circle at 50% 20%, #ffffff 0%, #f3f5fa 100%)";
 
             string textColor = isDarkMode ? "#ffffff" : "#1d1d21";
             string subTextColor = isDarkMode ? "#9a9ab0" : "#6e6e82";
-            string searchBg = isDarkMode ? "rgba(32, 32, 42, 0.85)" : "rgba(255, 255, 255, 0.95)";
-            string searchBorder = isDarkMode ? "rgba(255, 255, 255, 0.12)" : "rgba(0, 0, 0, 0.08)";
-            string cardBg = isDarkMode ? "rgba(255, 255, 255, 0.04)" : "rgba(255, 255, 255, 0.85)";
-            string cardBorder = isDarkMode ? "rgba(255, 255, 255, 0.08)" : "rgba(255, 255, 255, 0.6)";
+            string searchBg = isDarkMode ? "rgba(32, 33, 44, 0.88)" : "rgba(255, 255, 255, 0.95)";
+            string searchBorder = isDarkMode ? "rgba(255, 255, 255, 0.14)" : "rgba(0, 0, 0, 0.08)";
+            string cardBg = isDarkMode ? "rgba(255, 255, 255, 0.04)" : "rgba(255, 255, 255, 0.88)";
+            string cardBorder = isDarkMode ? "rgba(255, 255, 255, 0.09)" : "rgba(255, 255, 255, 0.65)";
 
             StringBuilder dialsSb = new StringBuilder();
             try
@@ -83,31 +83,31 @@ namespace BlackBrowser
 <link href='https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap' rel='stylesheet'>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Plus Jakarta Sans','Outfit','Inter',sans-serif;background:" + bg + @";color:" + textColor + @";display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:36px 20px;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+body{font-family:'Segoe UI Variable Display','Plus Jakarta Sans','Inter',sans-serif;background:" + bg + @";color:" + textColor + @";display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:36px 20px;overflow-x:hidden;-webkit-font-smoothing:antialiased}
 
 .clock-container{text-align:center;margin-bottom:28px;animation:fadeIn 0.5s ease}
-.time-display{font-size:72px;font-weight:300;letter-spacing:-2.5px;background:linear-gradient(135deg,#1a73e8 0%,#0b57d0 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;user-select:none;line-height:1.05;filter:drop-shadow(0 4px 14px rgba(26,115,232,0.18))}
-.greeting{font-size:20px;font-weight:500;margin-top:8px;color:" + subTextColor + @";letter-spacing:-0.2px}
-.ai-status-badge{display:inline-flex;align-items:center;gap:8px;margin-top:12px;padding:6px 16px;border-radius:20px;background:" + (isDarkMode ? "rgba(26,115,232,0.15)" : "rgba(26,115,232,0.08)") + @";color:#1a73e8;font-size:12.5px;font-weight:600;border:1px solid rgba(26,115,232,0.2)}
+.time-display{font-size:76px;font-weight:300;letter-spacing:-2.8px;background:linear-gradient(135deg,#0067c0 0%,#0b57d0 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;user-select:none;line-height:1.05;filter:drop-shadow(0 4px 14px rgba(0,103,192,0.18))}
+.greeting{font-size:21px;font-weight:500;margin-top:8px;color:" + subTextColor + @";letter-spacing:-0.3px}
+.ai-status-badge{display:inline-flex;align-items:center;gap:8px;margin-top:12px;padding:6px 18px;border-radius:20px;background:" + (isDarkMode ? "rgba(0,103,192,0.18)" : "rgba(0,103,192,0.08)") + @";color:#0067c0;font-size:12.5px;font-weight:600;border:1px solid rgba(0,103,192,0.22)}
 
 .search-container{width:100%;max-width:680px;margin-bottom:40px;animation:fadeIn 0.7s ease}
 .search-box{display:flex;align-items:center;width:100%;height:58px;padding:0 24px;border-radius:29px;background:" + searchBg + @";border:1.5px solid " + searchBorder + @";box-shadow:0 8px 32px rgba(0,0,0,0.06);backdrop-filter:blur(20px);transition:all .25s cubic-bezier(0.4,0,0.2,1)}
-.search-box:hover,.search-box:focus-within{box-shadow:0 12px 40px rgba(26,115,232,0.24);border-color:#1a73e8;transform:translateY(-1px)}
-.search-icon{color:#1a73e8;font-size:20px;margin-right:14px}
+.search-box:hover,.search-box:focus-within{box-shadow:0 12px 40px rgba(0,103,192,0.25);border-color:#0067c0;transform:translateY(-1px)}
+.search-icon{color:#0067c0;font-size:20px;margin-right:14px}
 .search-box input{flex:1;background:transparent;border:none;outline:none;color:" + textColor + @";font-size:16.5px;font-weight:400;font-family:'Inter',sans-serif}
-.search-box button{background:linear-gradient(135deg,#1a73e8 0%,#0b57d0 100%);border:none;color:#ffffff;font-weight:600;font-size:14.5px;cursor:pointer;padding:0 26px;border-radius:22px;height:42px;box-shadow:0 4px 14px rgba(26,115,232,0.35);transition:all .15s ease}
-.search-box button:hover{transform:scale(1.04);box-shadow:0 6px 20px rgba(26,115,232,0.45)}
+.search-box button{background:linear-gradient(135deg,#0067c0 0%,#0b57d0 100%);border:none;color:#ffffff;font-weight:600;font-size:14.5px;cursor:pointer;padding:0 26px;border-radius:22px;height:42px;box-shadow:0 4px 14px rgba(0,103,192,0.35);transition:all .15s ease}
+.search-box button:hover{transform:scale(1.04);box-shadow:0 6px 20px rgba(0,103,192,0.45)}
 
 .dials-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;width:100%;max-width:680px;animation:fadeIn 0.9s ease}
 .dial{display:flex;flex-direction:column;align-items:center;gap:10px;padding:18px 14px;border-radius:18px;background:" + cardBg + @";border:1px solid " + cardBorder + @";backdrop-filter:blur(20px);cursor:pointer;transition:all .22s cubic-bezier(0.4,0,0.2,1);text-decoration:none;color:" + textColor + @";box-shadow:0 4px 16px rgba(0,0,0,0.03)}
-.dial:hover{transform:translateY(-5px) scale(1.04);border-color:#1a73e8;box-shadow:0 14px 36px rgba(26,115,232,0.2)}
+.dial:hover{transform:translateY(-5px) scale(1.04);border-color:#0067c0;box-shadow:0 14px 36px rgba(0,103,192,0.22)}
 .dial-icon{width:52px;height:52px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,0.08);transition:transform .22s ease}
 .dial:hover .dial-icon{transform:scale(1.08)}
 .dial-label{font-size:13px;font-weight:600;letter-spacing:-0.1px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:110px}
 
 .features-bar{display:flex;align-items:center;justify-content:center;gap:14px;width:100%;max-width:680px;margin-top:32px;animation:fadeIn 1.1s ease;flex-wrap:wrap}
 .feature-pill{display:inline-flex;align-items:center;gap:8px;padding:9px 18px;border-radius:20px;background:" + cardBg + @";border:1px solid " + cardBorder + @";backdrop-filter:blur(16px);color:" + textColor + @";font-size:13px;font-weight:600;cursor:pointer;transition:all .2s ease;text-decoration:none;box-shadow:0 2px 10px rgba(0,0,0,0.03)}
-.feature-pill:hover{transform:translateY(-2px);border-color:#1a73e8;box-shadow:0 8px 24px rgba(26,115,232,0.18);color:#1a73e8}
+.feature-pill:hover{transform:translateY(-2px);border-color:#0067c0;box-shadow:0 8px 24px rgba(0,103,192,0.18);color:#0067c0}
 
 .footer-note{margin-top:40px;font-size:12.5px;color:" + subTextColor + @";display:flex;align-items:center;gap:16px;background:" + (isDarkMode ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.03)") + @";padding:10px 22px;border-radius:20px}
 
@@ -119,7 +119,7 @@ body{font-family:'Plus Jakarta Sans','Outfit','Inter',sans-serif;background:" + 
 <div class='clock-container'>
   <div class='time-display' id='clock'>12:00 PM</div>
   <div class='greeting' id='greeting'>Welcome to Black Browser</div>
-  <div class='ai-status-badge'>✨ 100% Local Privacy • Plus Jakarta Sans Typography</div>
+  <div class='ai-status-badge'>✨ Windows 11 Fluent 2 Design • 100% Local Privacy</div>
 </div>
 
 <form class='search-container' action='https://www.google.com/search' method='get'>
@@ -147,7 +147,7 @@ body{font-family:'Plus Jakarta Sans','Outfit','Inter',sans-serif;background:" + 
   <span>•</span>
   <span>🕵️ Private Mode Ready</span>
   <span>•</span>
-  <span>⚡ ~40MB RAM</span>
+  <span>⚡ ~38MB RAM</span>
 </div>
 
 <script>

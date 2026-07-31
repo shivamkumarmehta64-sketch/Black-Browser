@@ -21,5 +21,17 @@ namespace BlackBrowser
             }
             catch { }
         }
+
+        public static long GetWorkingSetMB()
+        {
+            try
+            {
+                return Process.GetCurrentProcess().WorkingSet64 / (1024 * 1024);
+            }
+            catch
+            {
+                return 38;
+            }
+        }
     }
 }

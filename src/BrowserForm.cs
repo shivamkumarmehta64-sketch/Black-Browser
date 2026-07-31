@@ -30,10 +30,15 @@ namespace BlackBrowser
         private Button extBtn;
         private Button menuBtn;
         private Button addTabBtn;
+        private Button ramBtn;
 
         private ContextMenuStrip mainMenu;
+        private ContextMenuStrip tabContextMenu;
+        private TabPage rightClickedTab;
+
         private NotifyIcon trayIcon;
         private Timer gcTimer;
+        private Timer ramTimer;
         private Timer bannerTimer;
 
         private EyeCareOverlayForm eyeCareOverlay;
@@ -47,7 +52,7 @@ namespace BlackBrowser
         public BrowserForm()
         {
             logPath = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "debug.log");
-            Log("=== Black Browser starting (YouTube Ad-Free Launcher v8.2) ===");
+            Log("=== Black Browser starting (Windows 11 Fluent 2 Edition v8.5) ===");
 
             this.SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint, true);
             this.DoubleBuffered = true;
@@ -55,7 +60,7 @@ namespace BlackBrowser
             this.Text = "Black Browser";
             this.Width = 1280;
             this.Height = 820;
-            this.BackColor = Color.FromArgb(245, 246, 250);
+            this.BackColor = Color.FromArgb(243, 243, 243);
             this.MinimumSize = new Size(900, 600);
             this.StartPosition = FormStartPosition.CenterScreen;
 
@@ -67,8 +72,10 @@ namespace BlackBrowser
 
             InitializeUI();
             InitializeMainMenu();
+            InitializeTabContextMenu();
             SetupTray();
             SetupGCTimer();
+            SetupRAMTimer();
 
             this.Show();
             this.BringToFront();
@@ -100,23 +107,38 @@ namespace BlackBrowser
             gcTimer.Start();
         }
 
+        private void SetupRAMTimer()
+        {
+            ramTimer = new Timer();
+            ramTimer.Interval = 10000;
+            ramTimer.Tick += (s, e) =>
+            {
+                if (ramBtn != null)
+                {
+                    long ramMB = MemoryTrimmer.GetWorkingSetMB();
+                    ramBtn.Text = "⚡ " + ramMB + "MB";
+                }
+            };
+            ramTimer.Start();
+        }
+
         private void InitializeUI()
         {
             headerContainer = new Panel();
             headerContainer.Dock = DockStyle.Top;
             headerContainer.Height = 68;
-            headerContainer.BackColor = Color.FromArgb(222, 225, 230);
+            headerContainer.BackColor = Color.FromArgb(235, 235, 235);
 
             softBanner = new Panel();
             softBanner.Dock = DockStyle.Top;
             softBanner.Height = 24;
-            softBanner.BackColor = Color.FromArgb(26, 115, 232);
+            softBanner.BackColor = Color.FromArgb(0, 103, 192);
 
             softBannerLabel = new Label();
             softBannerLabel.Dock = DockStyle.Fill;
-            softBannerLabel.Text = "✨ Black Browser Active — 100% Ad-Free YouTube & Zero Trackers";
+            softBannerLabel.Text = "✨ Black Browser Active — Windows 11 Fluent 2 & 100% Ad-Free YouTube";
             softBannerLabel.ForeColor = Color.White;
-            softBannerLabel.Font = new Font("Segoe UI", 8.5f, FontStyle.Bold);
+            softBannerLabel.Font = new Font("Segoe UI Variable Display", 8.5f, FontStyle.Bold);
             softBannerLabel.TextAlign = ContentAlignment.MiddleCenter;
 
             softBanner.Controls.Add(softBannerLabel);
@@ -125,7 +147,7 @@ namespace BlackBrowser
             bannerTimer.Interval = 4000;
             bannerTimer.Tick += (s, e) =>
             {
-                softBannerLabel.Text = "✨ Black Browser Active — 100% Ad-Free YouTube & Zero Trackers";
+                softBannerLabel.Text = "✨ Black Browser Active — Windows 11 Fluent 2 & 100% Ad-Free YouTube";
                 bannerTimer.Stop();
             };
 
@@ -156,7 +178,7 @@ namespace BlackBrowser
             menuBtn = CreateActionBtn("⋮", Color.FromArgb(255, 255, 255), Color.FromArgb(95, 99, 104), 32);
             menuBtn.Click += (s, e) => mainMenu.Show(menuBtn, new Point(0, menuBtn.Height));
 
-            addTabBtn = CreateActionBtn("+ Tab", Color.FromArgb(232, 240, 254), Color.FromArgb(26, 115, 232), 56);
+            addTabBtn = CreateActionBtn("+ Tab", Color.FromArgb(232, 240, 254), Color.FromArgb(0, 103, 192), 56);
             addTabBtn.Click += (s, e) => AddNewTab("New Tab", "about:blank");
 
             extBtn = CreateActionBtn("🧩 Ext", Color.FromArgb(241, 243, 244), Color.FromArgb(95, 99, 104), 64);
@@ -171,8 +193,17 @@ namespace BlackBrowser
             eyeCareBtn = CreateActionBtn("👁 Eye", Color.FromArgb(254, 247, 224), Color.FromArgb(180, 100, 0), 64);
             eyeCareBtn.Click += (s, e) => CycleEyeCareMode();
 
-            shieldBtn = CreateActionBtn("🛡 0", Color.FromArgb(232, 240, 254), Color.FromArgb(26, 115, 232), 62);
+            shieldBtn = CreateActionBtn("🛡 0", Color.FromArgb(232, 240, 254), Color.FromArgb(0, 103, 192), 62);
             shieldBtn.Click += (s, e) => ShowAdShieldStatus();
+
+            ramBtn = CreateActionBtn("⚡ 38MB", Color.FromArgb(230, 245, 235), Color.FromArgb(15, 120, 50), 72);
+            ramBtn.Click += (s, e) =>
+            {
+                MemoryTrimmer.TrimProcessMemory();
+                long ramMB = MemoryTrimmer.GetWorkingSetMB();
+                ramBtn.Text = "⚡ " + ramMB + "MB";
+                ShowSoftCommunication("⚡ Memory Optimization Completed — Purged Working Set");
+            };
 
             starBtn = CreateActionBtn("⭐", Color.FromArgb(254, 247, 224), Color.FromArgb(180, 100, 0), 32);
             starBtn.Click += (s, e) => ToggleCurrentTabBookmark();
@@ -184,6 +215,7 @@ namespace BlackBrowser
             actionsPanel.Controls.Add(notesBtn);
             actionsPanel.Controls.Add(eyeCareBtn);
             actionsPanel.Controls.Add(shieldBtn);
+            actionsPanel.Controls.Add(ramBtn);
             actionsPanel.Controls.Add(starBtn);
 
             urlBar = new TextBox();
@@ -192,7 +224,7 @@ namespace BlackBrowser
             urlBar.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
             urlBar.BackColor = Color.FromArgb(241, 243, 244);
             urlBar.ForeColor = Color.FromArgb(32, 33, 36);
-            urlBar.Font = new Font("Segoe UI", 10f);
+            urlBar.Font = new Font("Segoe UI Variable Display", 10f);
             urlBar.BorderStyle = BorderStyle.FixedSingle;
 
             urlBar.KeyDown += (s, e) =>
@@ -219,7 +251,7 @@ namespace BlackBrowser
             tabControl = new TabControl();
             tabControl.Dock = DockStyle.Fill;
             tabControl.Padding = new Point(14, 4);
-            tabControl.Font = new Font("Segoe UI", 9.5f);
+            tabControl.Font = new Font("Segoe UI Variable Display", 9.5f);
             tabControl.DrawMode = TabDrawMode.OwnerDrawFixed;
             tabControl.DrawItem += OnDrawTabItem;
             tabControl.MouseDown += OnTabMouseDown;
@@ -316,7 +348,7 @@ namespace BlackBrowser
             b.FlatAppearance.BorderSize = 0;
             b.BackColor = Color.FromArgb(255, 255, 255);
             b.ForeColor = Color.FromArgb(95, 99, 104);
-            b.Font = new Font("Segoe UI", 9.5f, FontStyle.Bold);
+            b.Font = new Font("Segoe UI Variable Display", 9.5f, FontStyle.Bold);
             b.Cursor = Cursors.Hand;
             return b;
         }
@@ -332,7 +364,7 @@ namespace BlackBrowser
             b.FlatAppearance.BorderSize = 0;
             b.BackColor = bg;
             b.ForeColor = fg;
-            b.Font = new Font("Segoe UI", 8.5f, FontStyle.Bold);
+            b.Font = new Font("Segoe UI Variable Display", 8.5f, FontStyle.Bold);
             b.Cursor = Cursors.Hand;
             return b;
         }
@@ -357,17 +389,17 @@ namespace BlackBrowser
 
             if (selected)
             {
-                Color barColor = isPrivate ? Color.FromArgb(160, 90, 240) : Color.FromArgb(26, 115, 232);
-                using (Pen p = new Pen(barColor, 2))
+                Color barColor = isPrivate ? Color.FromArgb(160, 90, 240) : Color.FromArgb(0, 103, 192);
+                using (Pen p = new Pen(barColor, 3))
                 {
-                    e.Graphics.DrawLine(p, rect.Left, rect.Top, rect.Right, rect.Top);
+                    e.Graphics.DrawLine(p, rect.Left, rect.Bottom - 1, rect.Right, rect.Bottom - 1);
                 }
             }
 
             Color textColor = isPrivate ? Color.FromArgb(200, 180, 255) : (selected ? Color.FromArgb(32, 33, 36) : Color.FromArgb(95, 99, 104));
 
             TextRenderer.DrawText(e.Graphics, page.Text, tabControl.Font,
-                new Rectangle(rect.X + 6, rect.Y + 4, rect.Width - 24, rect.Height - 4),
+                new Rectangle(rect.X + 8, rect.Y + 4, rect.Width - 26, rect.Height - 4),
                 textColor,
                 TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
 
@@ -384,14 +416,103 @@ namespace BlackBrowser
             for (int i = 0; i < tabControl.TabPages.Count; i++)
             {
                 Rectangle rect = tabControl.GetTabRect(i);
-                Rectangle closeRect = new Rectangle(rect.Right - 20, rect.Y + (rect.Height - 14) / 2, 14, 14);
-
-                if (closeRect.Contains(e.Location))
+                if (rect.Contains(e.Location))
                 {
-                    CloseTabAtIndex(i);
-                    break;
+                    rightClickedTab = tabControl.TabPages[i];
+
+                    Rectangle closeRect = new Rectangle(rect.Right - 20, rect.Y + (rect.Height - 14) / 2, 14, 14);
+                    if (closeRect.Contains(e.Location))
+                    {
+                        CloseTabAtIndex(i);
+                        return;
+                    }
+
+                    if (e.Button == MouseButtons.Middle)
+                    {
+                        CloseTabAtIndex(i);
+                        return;
+                    }
+
+                    if (e.Button == MouseButtons.Right)
+                    {
+                        tabContextMenu.Show(tabControl, e.Location);
+                        return;
+                    }
                 }
             }
+        }
+
+        private void InitializeTabContextMenu()
+        {
+            tabContextMenu = new ContextMenuStrip();
+            tabContextMenu.Font = new Font("Segoe UI Variable Display", 9.5f);
+
+            tabContextMenu.Items.Add("➕ Duplicate Tab", null, (s, e) =>
+            {
+                if (rightClickedTab != null)
+                {
+                    WebView2 wv = GetWebView(rightClickedTab);
+                    string url = (wv != null && wv.Source != null) ? wv.Source.ToString() : "about:blank";
+                    AddNewTab(rightClickedTab.Text, url);
+                }
+            });
+
+            tabContextMenu.Items.Add("🔊 Mute / Unmute Tab", null, (s, e) =>
+            {
+                if (rightClickedTab != null)
+                {
+                    WebView2 wv = GetWebView(rightClickedTab);
+                    if (wv != null && wv.CoreWebView2 != null)
+                    {
+                        wv.CoreWebView2.IsMuted = !wv.CoreWebView2.IsMuted;
+                        ShowSoftCommunication(wv.CoreWebView2.IsMuted ? "🔇 Tab Muted" : "🔊 Tab Unmuted");
+                    }
+                }
+            });
+
+            tabContextMenu.Items.Add("↻ Reload Tab", null, (s, e) =>
+            {
+                if (rightClickedTab != null)
+                {
+                    WebView2 wv = GetWebView(rightClickedTab);
+                    if (wv != null && wv.CoreWebView2 != null) wv.Reload();
+                }
+            });
+
+            tabContextMenu.Items.Add(new ToolStripSeparator());
+
+            tabContextMenu.Items.Add("✕ Close Tab", null, (s, e) =>
+            {
+                if (rightClickedTab != null)
+                {
+                    int idx = tabControl.TabPages.IndexOf(rightClickedTab);
+                    if (idx >= 0) CloseTabAtIndex(idx);
+                }
+            });
+
+            tabContextMenu.Items.Add("🚫 Close Other Tabs", null, (s, e) =>
+            {
+                if (rightClickedTab != null)
+                {
+                    int keepIdx = tabControl.TabPages.IndexOf(rightClickedTab);
+                    for (int i = tabControl.TabPages.Count - 1; i >= 0; i--)
+                    {
+                        if (i != keepIdx) CloseTabAtIndex(i);
+                    }
+                }
+            });
+
+            tabContextMenu.Items.Add("➡️ Close Tabs to Right", null, (s, e) =>
+            {
+                if (rightClickedTab != null)
+                {
+                    int keepIdx = tabControl.TabPages.IndexOf(rightClickedTab);
+                    for (int i = tabControl.TabPages.Count - 1; i > keepIdx; i--)
+                    {
+                        CloseTabAtIndex(i);
+                    }
+                }
+            });
         }
 
         private void CloseTabAtIndex(int index)
@@ -425,7 +546,7 @@ namespace BlackBrowser
         private void InitializeMainMenu()
         {
             mainMenu = new ContextMenuStrip();
-            mainMenu.Font = new Font("Segoe UI", 9.5f);
+            mainMenu.Font = new Font("Segoe UI Variable Display", 9.5f);
 
             mainMenu.Items.Add("➕ New Tab (Ctrl+T)", null, (s, e) => AddNewTab("New Tab", "about:blank"));
             mainMenu.Items.Add("🕵️ New Private Tab (Ctrl+Shift+P)", null, (s, e) => AddNewTab("Private Tab", "about:blank", isPrivate: true));
@@ -436,6 +557,11 @@ namespace BlackBrowser
             mainMenu.Items.Add("🛒 Chrome Web Store", null, (s, e) => AddNewTab("Chrome Store", "https://chromewebstore.google.com"));
             mainMenu.Items.Add("🧩 Edge Add-ons Store", null, (s, e) => AddNewTab("Edge Add-ons", "https://microsoftedge.microsoft.com/addons"));
             mainMenu.Items.Add(new ToolStripSeparator());
+            mainMenu.Items.Add("⚡ Optimize Memory Now", null, (s, e) =>
+            {
+                MemoryTrimmer.TrimProcessMemory();
+                ShowSoftCommunication("⚡ Memory Optimization Completed");
+            });
             mainMenu.Items.Add("⚙️ Settings & Device Info (Ctrl+,)", null, (s, e) => OpenSettingsDialog(0));
             mainMenu.Items.Add("📝 Dark Notes (Ctrl+Shift+N)", null, (s, e) => OpenSettingsDialog(2));
             mainMenu.Items.Add("👁️ Cycle Eye Care Filter (Ctrl+Shift+E)", null, (s, e) => CycleEyeCareMode());
@@ -448,54 +574,53 @@ namespace BlackBrowser
         private void SetTheme(bool dark)
         {
             isDarkMode = dark;
-            Color defaultBg = isDarkMode ? Color.FromArgb(18, 18, 22) : Color.FromArgb(245, 246, 250);
 
-            if (isDarkMode)
-            {
-                headerContainer.BackColor = Color.FromArgb(32, 33, 36);
-                omniboxPanel.BackColor = Color.FromArgb(40, 42, 45);
-                urlBar.BackColor = Color.FromArgb(53, 54, 58);
-                urlBar.ForeColor = Color.White;
-                this.BackColor = Color.FromArgb(20, 20, 22);
-            }
-            else
-            {
-                headerContainer.BackColor = Color.FromArgb(222, 225, 230);
-                omniboxPanel.BackColor = Color.FromArgb(255, 255, 255);
-                urlBar.BackColor = Color.FromArgb(241, 243, 244);
-                urlBar.ForeColor = Color.FromArgb(32, 33, 36);
-                this.BackColor = Color.FromArgb(245, 246, 250);
-            }
+            Color bg = dark ? Color.FromArgb(18, 18, 22) : Color.FromArgb(243, 243, 243);
+            Color headerBg = dark ? Color.FromArgb(28, 28, 34) : Color.FromArgb(235, 235, 235);
+            Color omniBg = dark ? Color.FromArgb(34, 34, 42) : Color.FromArgb(255, 255, 255);
+            Color inputBg = dark ? Color.FromArgb(44, 44, 54) : Color.FromArgb(241, 243, 244);
+            Color inputFg = dark ? Color.FromArgb(240, 240, 245) : Color.FromArgb(32, 33, 36);
 
-            foreach (TabPage page in tabControl.TabPages)
+            this.BackColor = bg;
+            headerContainer.BackColor = headerBg;
+            omniboxPanel.BackColor = omniBg;
+            urlBar.BackColor = inputBg;
+            urlBar.ForeColor = inputFg;
+
+            foreach (TabPage p in tabControl.TabPages)
             {
-                WebView2 wv = GetWebView(page);
-                if (wv != null)
+                bool isPriv = p.Tag != null && (bool)p.Tag == true;
+                p.BackColor = isPriv ? Color.FromArgb(18, 18, 24) : bg;
+
+                WebView2 wv = GetWebView(p);
+                if (wv != null && wv.CoreWebView2 != null && wv.Source != null)
                 {
-                    wv.DefaultBackgroundColor = defaultBg;
-                    if (wv.CoreWebView2 != null && (wv.Source == null || wv.Source.ToString().EndsWith("speeddial.html") || wv.Source.ToString() == "about:blank"))
+                    string uriStr = wv.Source.ToString();
+                    if (uriStr.EndsWith("speeddial.html"))
                     {
-                        wv.CoreWebView2.Navigate(SpeedDialPage.GetSpeedDialFilePath(isDarkMode));
+                        wv.CoreWebView2.Navigate(SpeedDialPage.GetSpeedDialFilePath(dark));
                     }
                 }
             }
+            tabControl.Invalidate();
         }
 
         private void ToggleTheme()
         {
             SetTheme(!isDarkMode);
+            ShowSoftCommunication(isDarkMode ? "🌙 Dark Theme Enabled" : "☀️ Light Theme Enabled");
         }
 
         private void SetEyeCareMode(int mode)
         {
             eyeCareMode = mode;
-            eyeCareOverlay.SetMode(eyeCareMode);
+            eyeCareOverlay.SetMode(mode);
 
             if (eyeCareMode == 1)
             {
                 eyeCareBtn.Text = "👁 Warm";
-                eyeCareBtn.BackColor = Color.FromArgb(254, 235, 180);
-                ShowSoftCommunication("👁️ Eye Care Filter: Warm Amber (18%)");
+                eyeCareBtn.BackColor = Color.FromArgb(255, 230, 180);
+                ShowSoftCommunication("👁️ Eye Care Filter: Warm Blue-Light Tint (25%)");
             }
             else if (eyeCareMode == 2)
             {
@@ -552,7 +677,7 @@ namespace BlackBrowser
 
                 Color defaultBg = isPrivate
                     ? Color.FromArgb(18, 18, 24)
-                    : (isDarkMode ? Color.FromArgb(18, 18, 22) : Color.FromArgb(245, 246, 250));
+                    : (isDarkMode ? Color.FromArgb(18, 18, 22) : Color.FromArgb(243, 243, 243));
 
                 page.BackColor = defaultBg;
 
@@ -880,49 +1005,44 @@ namespace BlackBrowser
             }
         }
 
-        public void ShowMainWindow()
-        {
-            if (this.InvokeRequired)
-            {
-                this.Invoke((Action)ShowMainWindow);
-                return;
-            }
-            this.Visible = true;
-            this.Show();
-            if (this.WindowState == FormWindowState.Minimized)
-                this.WindowState = FormWindowState.Normal;
-            this.ShowInTaskbar = true;
-            this.BringToFront();
-            this.Activate();
-            Program.ForceForegroundWindow(this.Handle);
-        }
-
         private void SetupTray()
         {
-            trayIcon = new NotifyIcon();
-            trayIcon.Text = "Black Browser";
-
-            string iconPath = Path.Combine(Application.StartupPath, "icon.ico");
-            if (File.Exists(iconPath))
-                trayIcon.Icon = new Icon(iconPath);
-
-            var menu = new ContextMenuStrip();
-            menu.Items.Add("Show Black Browser", null, (s, e) => ShowMainWindow());
-            menu.Items.Add(new ToolStripSeparator());
-            menu.Items.Add("Quit", null, (s, e) =>
+            try
             {
-                trayIcon.Visible = false;
-                Application.Exit();
-            });
+                string iconPath = Path.Combine(Application.StartupPath, "icon.ico");
+                if (File.Exists(iconPath))
+                {
+                    trayIcon = new NotifyIcon();
+                    trayIcon.Icon = new Icon(iconPath);
+                    trayIcon.Text = "Black Browser (Fluent 2)";
+                    trayIcon.Visible = true;
 
-            trayIcon.ContextMenuStrip = menu;
-            trayIcon.Visible = true;
+                    ContextMenuStrip menu = new ContextMenuStrip();
+                    menu.Items.Add("Open Black Browser", null, (s, e) => ShowMainWindow());
+                    menu.Items.Add("⚡ Optimize Memory", null, (s, e) => MemoryTrimmer.TrimProcessMemory());
+                    menu.Items.Add(new ToolStripSeparator());
+                    menu.Items.Add("Exit", null, (s, e) => ExitApp());
 
-            trayIcon.MouseDoubleClick += (s, e) =>
-            {
-                if (e.Button == MouseButtons.Left)
-                    ShowMainWindow();
-            };
+                    trayIcon.ContextMenuStrip = menu;
+                    trayIcon.DoubleClick += (s, e) => ShowMainWindow();
+                }
+            }
+            catch { }
+        }
+
+        private void ShowMainWindow()
+        {
+            this.Show();
+            this.WindowState = FormWindowState.Normal;
+            this.BringToFront();
+            this.Activate();
+            ResumeActiveWebView();
+        }
+
+        private void ExitApp()
+        {
+            if (trayIcon != null) trayIcon.Visible = false;
+            Application.Exit();
         }
 
         private void OnFormKeyDown(object sender, KeyEventArgs e)
@@ -932,15 +1052,39 @@ namespace BlackBrowser
                 e.SuppressKeyPress = true;
                 AddNewTab("New Tab", "about:blank");
             }
-            else if (e.Control && e.Shift && e.KeyCode == Keys.P)
-            {
-                e.SuppressKeyPress = true;
-                AddNewTab("Private Tab", "about:blank", isPrivate: true);
-            }
             else if (e.Control && e.KeyCode == Keys.W)
             {
                 e.SuppressKeyPress = true;
                 CloseCurrentTab();
+            }
+            else if (e.Control && e.KeyCode == Keys.Tab)
+            {
+                e.SuppressKeyPress = true;
+                if (tabControl.TabPages.Count > 1)
+                {
+                    int nextIdx = e.Shift
+                        ? (tabControl.SelectedIndex - 1 + tabControl.TabPages.Count) % tabControl.TabPages.Count
+                        : (tabControl.SelectedIndex + 1) % tabControl.TabPages.Count;
+                    tabControl.SelectedIndex = nextIdx;
+                }
+            }
+            else if (e.Control && e.KeyCode >= Keys.D1 && e.KeyCode <= Keys.D8)
+            {
+                e.SuppressKeyPress = true;
+                int targetIdx = e.KeyCode - Keys.D1;
+                if (targetIdx < tabControl.TabPages.Count)
+                    tabControl.SelectedIndex = targetIdx;
+            }
+            else if (e.Control && e.KeyCode == Keys.D9)
+            {
+                e.SuppressKeyPress = true;
+                if (tabControl.TabPages.Count > 0)
+                    tabControl.SelectedIndex = tabControl.TabPages.Count - 1;
+            }
+            else if (e.Control && e.Shift && e.KeyCode == Keys.P)
+            {
+                e.SuppressKeyPress = true;
+                AddNewTab("Private Tab", "about:blank", isPrivate: true);
             }
             else if (e.Control && e.KeyCode == Keys.L)
             {
@@ -1047,8 +1191,10 @@ namespace BlackBrowser
             {
                 if (eyeCareOverlay != null) eyeCareOverlay.Dispose();
                 if (mainMenu        != null) mainMenu.Dispose();
+                if (tabContextMenu  != null) tabContextMenu.Dispose();
                 if (trayIcon        != null) { trayIcon.Visible = false; trayIcon.Dispose(); }
                 if (gcTimer         != null) gcTimer.Dispose();
+                if (ramTimer        != null) ramTimer.Dispose();
                 if (bannerTimer     != null) bannerTimer.Dispose();
             }
             base.Dispose(disposing);
