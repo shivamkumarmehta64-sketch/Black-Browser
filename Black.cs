@@ -119,7 +119,7 @@ namespace BlackBrowser
 
         private EyeCareOverlayForm eyeCareOverlay;
         private int eyeCareMode = 0;
-        private bool isDarkMode = false; // Brave Light default
+        private bool isDarkMode = true; // Flagship Deep Blue-Black Dark Mode Default
 
         private CoreWebView2Environment webViewEnv;
         private int totalBlockedAds = 0;
@@ -131,12 +131,12 @@ namespace BlackBrowser
         public MainForm()
         {
             logPath = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "debug.log");
-            Log("=== Black Browser (Brave Light + Win11 Fluent) starting ===");
+            Log("=== Black Browser (Deep Blue-Black Flagship Edition) starting ===");
 
-            this.Text = "Black (Brave Light Edition)";
+            this.Text = "Black (Deep Blue-Black Flagship Edition)";
             this.Width = 1280;
             this.Height = 820;
-            this.BackColor = Color.FromArgb(249, 249, 251); // Win11 Light background
+            this.BackColor = Color.FromArgb(11, 14, 20); // Deep Blue-Black background
             this.MinimumSize = new Size(900, 600);
 
             string iconPath = Path.Combine(Application.StartupPath, "icon.ico");
@@ -177,36 +177,36 @@ namespace BlackBrowser
             gcTimer.Start();
         }
 
-        // ─── Windows 11 Fluent + Brave Light UI Setup ────────────────────────────
+        // ─── Deep Blue-Black Flagship UI Setup ──────────────────────────────────
 
         private void InitializeUI()
         {
             topPanel = new Panel();
             topPanel.Dock = DockStyle.Top;
             topPanel.Height = 46;
-            topPanel.BackColor = Color.FromArgb(255, 255, 255);
+            topPanel.BackColor = Color.FromArgb(22, 27, 34); // Onyx Blue-Black header
             topPanel.Padding = new Padding(6, 6, 6, 6);
 
             navPanel = new Panel();
             navPanel.Dock = DockStyle.Fill;
-            navPanel.BackColor = Color.FromArgb(255, 255, 255);
+            navPanel.BackColor = Color.FromArgb(22, 27, 34);
 
-            backBtn = CreateBraveButton("←", "Back (Alt+Left)", 0);
-            fwdBtn = CreateBraveButton("→", "Forward (Alt+Right)", 36);
-            reloadBtn = CreateBraveButton("↻", "Reload (Ctrl+R / F5)", 72);
+            backBtn = CreateFlagshipButton("←", "Back (Alt+Left)", 0);
+            fwdBtn = CreateFlagshipButton("→", "Forward (Alt+Right)", 36);
+            reloadBtn = CreateFlagshipButton("↻", "Reload (Ctrl+R / F5)", 72);
 
             backBtn.Click += (s, e) => { WebView2 wv = GetCurrentWebView(); if (wv != null && wv.CanGoBack) wv.GoBack(); };
             fwdBtn.Click += (s, e) => { WebView2 wv = GetCurrentWebView(); if (wv != null && wv.CanGoForward) wv.GoForward(); };
             reloadBtn.Click += (s, e) => ReloadCurrentTab();
 
-            // Brave Address Pill Bar
+            // Cyber Cyan Address Pill Bar
             urlBar = new TextBox();
             urlBar.Location = new Point(112, 6);
             urlBar.Width = this.Width - 570;
             urlBar.Height = 30;
             urlBar.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
-            urlBar.BackColor = Color.FromArgb(243, 243, 246);
-            urlBar.ForeColor = Color.FromArgb(32, 32, 36);
+            urlBar.BackColor = Color.FromArgb(31, 36, 48); // Deep Blue Pill
+            urlBar.ForeColor = Color.FromArgb(240, 246, 252);
             urlBar.Font = new Font("Segoe UI", 10.5f);
             urlBar.BorderStyle = BorderStyle.FixedSingle;
 
@@ -220,17 +220,17 @@ namespace BlackBrowser
             };
             urlBar.Click += (s, e) => urlBar.SelectAll();
 
-            // Brave Shield Button (Lion Orange Pill)
+            // Shield Button (Cyan Blue Cyber Badge)
             shieldBtn = new Button();
-            shieldBtn.Text = "🦁 0";
+            shieldBtn.Text = "🛡 0";
             shieldBtn.Width = 62;
             shieldBtn.Height = 30;
             shieldBtn.Anchor = AnchorStyles.Right | AnchorStyles.Top;
             shieldBtn.Location = new Point(this.Width - 445, 5);
             shieldBtn.FlatStyle = FlatStyle.Flat;
             shieldBtn.FlatAppearance.BorderSize = 0;
-            shieldBtn.BackColor = Color.FromArgb(255, 240, 235);
-            shieldBtn.ForeColor = Color.FromArgb(255, 80, 0); // Brave Lion Orange
+            shieldBtn.BackColor = Color.FromArgb(13, 40, 71);
+            shieldBtn.ForeColor = Color.FromArgb(0, 210, 255); // Neon Cyan Blue
             shieldBtn.Font = new Font("Segoe UI", 9f, FontStyle.Bold);
             shieldBtn.Cursor = Cursors.Hand;
 
@@ -243,23 +243,23 @@ namespace BlackBrowser
             eyeCareBtn.Location = new Point(this.Width - 378, 5);
             eyeCareBtn.FlatStyle = FlatStyle.Flat;
             eyeCareBtn.FlatAppearance.BorderSize = 0;
-            eyeCareBtn.BackColor = Color.FromArgb(254, 247, 224);
-            eyeCareBtn.ForeColor = Color.FromArgb(180, 100, 0);
+            eyeCareBtn.BackColor = Color.FromArgb(45, 35, 10);
+            eyeCareBtn.ForeColor = Color.FromArgb(255, 200, 50);
             eyeCareBtn.Font = new Font("Segoe UI", 8.5f, FontStyle.Bold);
             eyeCareBtn.Cursor = Cursors.Hand;
             eyeCareBtn.Click += (s, e) => CycleEyeCareMode();
 
             // Theme Switcher (🌙 Dark / ☀️ Light)
             themeBtn = new Button();
-            themeBtn.Text = "☀️ Light";
+            themeBtn.Text = "🌙 Dark";
             themeBtn.Width = 78;
             themeBtn.Height = 30;
             themeBtn.Anchor = AnchorStyles.Right | AnchorStyles.Top;
             themeBtn.Location = new Point(this.Width - 302, 5);
             themeBtn.FlatStyle = FlatStyle.Flat;
             themeBtn.FlatAppearance.BorderSize = 0;
-            themeBtn.BackColor = Color.FromArgb(240, 242, 245);
-            themeBtn.ForeColor = Color.FromArgb(32, 32, 36);
+            themeBtn.BackColor = Color.FromArgb(31, 36, 48);
+            themeBtn.ForeColor = Color.FromArgb(0, 210, 255);
             themeBtn.Font = new Font("Segoe UI", 8.5f, FontStyle.Bold);
             themeBtn.Cursor = Cursors.Hand;
             themeBtn.Click += (s, e) => ToggleTheme();
@@ -273,8 +273,8 @@ namespace BlackBrowser
             extBtn.Location = new Point(this.Width - 220, 5);
             extBtn.FlatStyle = FlatStyle.Flat;
             extBtn.FlatAppearance.BorderSize = 0;
-            extBtn.BackColor = Color.FromArgb(238, 242, 255);
-            extBtn.ForeColor = Color.FromArgb(99, 102, 241); // Brave Indigo
+            extBtn.BackColor = Color.FromArgb(20, 50, 90);
+            extBtn.ForeColor = Color.FromArgb(100, 180, 255);
             extBtn.Font = new Font("Segoe UI", 8.5f, FontStyle.Bold);
             extBtn.Cursor = Cursors.Hand;
             extBtn.Click += (s, e) => AddNewTab("Chrome Extensions", "https://chromewebstore.google.com");
@@ -288,8 +288,8 @@ namespace BlackBrowser
             newTabBtn.Location = new Point(this.Width - 115, 5);
             newTabBtn.FlatStyle = FlatStyle.Flat;
             newTabBtn.FlatAppearance.BorderSize = 0;
-            newTabBtn.BackColor = Color.FromArgb(243, 243, 246);
-            newTabBtn.ForeColor = Color.FromArgb(60, 60, 60);
+            newTabBtn.BackColor = Color.FromArgb(31, 36, 48);
+            newTabBtn.ForeColor = Color.White;
             newTabBtn.Font = new Font("Segoe UI", 12f, FontStyle.Bold);
             newTabBtn.Cursor = Cursors.Hand;
             newTabBtn.Click += (s, e) => AddNewTab("New Tab", "about:blank");
@@ -303,8 +303,8 @@ namespace BlackBrowser
             closeTabBtn.Location = new Point(this.Width - 78, 5);
             closeTabBtn.FlatStyle = FlatStyle.Flat;
             closeTabBtn.FlatAppearance.BorderSize = 0;
-            closeTabBtn.BackColor = Color.FromArgb(253, 231, 233);
-            closeTabBtn.ForeColor = Color.FromArgb(232, 17, 35);
+            closeTabBtn.BackColor = Color.FromArgb(60, 20, 25);
+            closeTabBtn.ForeColor = Color.FromArgb(255, 100, 100);
             closeTabBtn.Font = new Font("Segoe UI", 10f, FontStyle.Bold);
             closeTabBtn.Cursor = Cursors.Hand;
             closeTabBtn.Click += (s, e) => CloseCurrentTab();
@@ -351,7 +351,7 @@ namespace BlackBrowser
             };
         }
 
-        private Button CreateBraveButton(string text, string tooltip, int left)
+        private Button CreateFlagshipButton(string text, string tooltip, int left)
         {
             Button b = new Button();
             b.Text = text;
@@ -360,8 +360,8 @@ namespace BlackBrowser
             b.Height = 30;
             b.FlatStyle = FlatStyle.Flat;
             b.FlatAppearance.BorderSize = 0;
-            b.BackColor = Color.FromArgb(255, 255, 255);
-            b.ForeColor = Color.FromArgb(96, 96, 96);
+            b.BackColor = Color.FromArgb(31, 36, 48);
+            b.ForeColor = Color.FromArgb(200, 210, 225);
             b.Font = new Font("Segoe UI", 10f, FontStyle.Bold);
             b.Cursor = Cursors.Hand;
             return b;
@@ -373,11 +373,11 @@ namespace BlackBrowser
             if (isDarkMode)
             {
                 themeBtn.Text = "🌙 Dark";
-                topPanel.BackColor = Color.FromArgb(28, 28, 30);
-                navPanel.BackColor = Color.FromArgb(28, 28, 30);
-                urlBar.BackColor = Color.FromArgb(44, 44, 46);
+                topPanel.BackColor = Color.FromArgb(22, 27, 34);
+                navPanel.BackColor = Color.FromArgb(22, 27, 34);
+                urlBar.BackColor = Color.FromArgb(31, 36, 48);
                 urlBar.ForeColor = Color.White;
-                this.BackColor = Color.FromArgb(18, 18, 20);
+                this.BackColor = Color.FromArgb(11, 14, 20);
             }
             else
             {
@@ -389,11 +389,10 @@ namespace BlackBrowser
                 this.BackColor = Color.FromArgb(249, 249, 251);
             }
 
-            // Update current NTP tab if active
             WebView2 wv = GetCurrentWebView();
             if (wv != null && wv.Source != null && wv.Source.ToString() == "about:blank")
             {
-                wv.CoreWebView2.NavigateToString(GetBraveSpeedDialHTML());
+                wv.CoreWebView2.NavigateToString(GetFlagshipSpeedDialHTML());
             }
         }
 
@@ -415,11 +414,11 @@ namespace BlackBrowser
             else
             {
                 eyeCareBtn.Text = "👁 Eye";
-                eyeCareBtn.BackColor = Color.FromArgb(254, 247, 224);
+                eyeCareBtn.BackColor = Color.FromArgb(45, 35, 10);
             }
         }
 
-        // ─── Environment Initialization with Extension Engine Support ────────────
+        // ─── Environment Initialization with Standard Chrome User-Agent ─────────
 
         private async void InitializeBrowserEnv()
         {
@@ -429,13 +428,16 @@ namespace BlackBrowser
                     Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                     "black-webview2");
 
+                // Standard Chrome Windows User-Agent for 100% Site Compatibility (Fixes Samsung & engine errors)
+                string chromeUA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 Edg/128.0.0.0";
+
                 var options = new CoreWebView2EnvironmentOptions(
                     "--disk-cache-size=33554432 " +       // 32 MB disk cache
                     "--media-cache-size=33554432 " +      // 32 MB media cache
                     "--renderer-process-limit=1 " +       // max 1 renderer process
                     "--enable-experimental-extension-apis " +
                     "--allow-legacy-extension-manifests " +
-                    "--enable-extension-activity-logging " +
+                    "--user-agent=\"" + chromeUA + "\" " +
                     "--no-first-run " +                   // skip first-run setup
                     "--disable-sync " +                   // no Chrome account sync
                     "--disable-translate " +              // no translate UI
@@ -443,7 +445,7 @@ namespace BlackBrowser
                 );
 
                 webViewEnv = await CoreWebView2Environment.CreateAsync(null, userDataFolder, options);
-                Log("Environment created successfully");
+                Log("Environment created successfully with full Chrome compatibility User-Agent");
 
                 AddNewTab("New Tab", "about:blank");
             }
@@ -461,7 +463,7 @@ namespace BlackBrowser
             if (webViewEnv == null) return;
 
             TabPage page = new TabPage(title);
-            page.BackColor = isDarkMode ? Color.Black : Color.White;
+            page.BackColor = isDarkMode ? Color.FromArgb(11, 14, 20) : Color.White;
 
             WebView2 wv = new WebView2();
             wv.Dock = DockStyle.Fill;
@@ -488,7 +490,7 @@ namespace BlackBrowser
                     if (msg == "AD_BLOCKED")
                     {
                         totalBlockedAds++;
-                        shieldBtn.Text = "🦁 " + totalBlockedAds;
+                        shieldBtn.Text = "🛡 " + totalBlockedAds;
                     }
                 }
                 catch { }
@@ -519,7 +521,7 @@ namespace BlackBrowser
 
             if (url == "about:blank" || string.IsNullOrEmpty(url))
             {
-                wv.CoreWebView2.NavigateToString(GetBraveSpeedDialHTML());
+                wv.CoreWebView2.NavigateToString(GetFlagshipSpeedDialHTML());
             }
             else
             {
@@ -547,7 +549,7 @@ namespace BlackBrowser
                 WebView2 wv = GetCurrentWebView();
                 if (wv != null && wv.CoreWebView2 != null)
                 {
-                    wv.CoreWebView2.NavigateToString(GetBraveSpeedDialHTML());
+                    wv.CoreWebView2.NavigateToString(GetFlagshipSpeedDialHTML());
                     urlBar.Text = "";
                     tabControl.SelectedTab.Text = "New Tab";
                 }
@@ -665,7 +667,7 @@ namespace BlackBrowser
                 try
                 {
                     totalBlockedAds++;
-                    this.Invoke((Action)(() => shieldBtn.Text = "🦁 " + totalBlockedAds));
+                    this.Invoke((Action)(() => shieldBtn.Text = "🛡 " + totalBlockedAds));
 
                     e.Response = wv.CoreWebView2.Environment.CreateWebResourceResponse(
                         new MemoryStream(new byte[0]), 200, "OK", "Content-Type: text/plain");
@@ -725,14 +727,14 @@ true;
 ";
         }
 
-        // ─── Brave Light / Glassy Space Dark Speed Dial HTML ──────────────────────
+        // ─── Deep Blue-Black Flagship Speed Dial HTML ─────────────────────────────
 
-        private string GetBraveSpeedDialHTML()
+        private string GetFlagshipSpeedDialHTML()
         {
-            string bg = isDarkMode ? "#121216" : "linear-gradient(180deg,#ffffff 0%,#f5f5f7 100%)";
-            string textColor = isDarkMode ? "#ffffff" : "#1d1d1f";
-            string cardBg = isDarkMode ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.85)";
-            string cardBorder = isDarkMode ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)";
+            string bg = isDarkMode ? "#0b0e14" : "#ffffff";
+            string textColor = isDarkMode ? "#f0f6fc" : "#1d1d1f";
+            string cardBg = isDarkMode ? "rgba(22,27,34,0.85)" : "rgba(255,255,255,0.85)";
+            string cardBorder = isDarkMode ? "rgba(48,54,67,0.8)" : "rgba(0,0,0,0.06)";
 
             return @"<!DOCTYPE html>
 <html>
@@ -744,39 +746,39 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubunt
 
 /* Header Branding */
 .brand{display:flex;align-items:center;gap:14px;margin-bottom:28px;user-select:none;animation:fadeInDown .5s ease}
-.brand-badge{width:54px;height:54px;border-radius:18px;background:linear-gradient(135deg,#ff5000 0%,#fb542b 100%);display:flex;align-items:center;justify-content:center;color:#ffffff;font-size:26px;font-weight:800;box-shadow:0 8px 24px rgba(255,80,0,0.3)}
-.brand-title{font-size:38px;font-weight:800;letter-spacing:-0.5px;color:" + textColor + @"}
-.brand-title span{color:#ff5000;font-weight:400}
+.brand-badge{width:56px;height:56px;border-radius:18px;background:linear-gradient(135deg,#00d2ff 0%,#0a84ff 100%);display:flex;align-items:center;justify-content:center;color:#0b0e14;font-size:26px;font-weight:900;box-shadow:0 8px 30px rgba(0,210,255,0.35)}
+.brand-title{font-size:38px;font-weight:900;letter-spacing:-0.5px;color:" + textColor + @"}
+.brand-title span{color:#00d2ff;font-weight:400}
 
-/* Stats Pill Dashboard (Brave Lion Shield Style) */
+/* Stats Pill Dashboard */
 .stats-bar{display:flex;gap:16px;margin-bottom:32px;animation:fadeIn .6s ease}
-.stat-card{background:" + cardBg + @";border:1px solid " + cardBorder + @";backdrop-filter:blur(16px);border-radius:16px;padding:14px 22px;display:flex;align-items:center;gap:14px;box-shadow:0 4px 16px rgba(0,0,0,0.04);transition:all .2s ease}
-.stat-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(255,80,0,0.12);border-color:#ff5000}
+.stat-card{background:" + cardBg + @";border:1px solid " + cardBorder + @";backdrop-filter:blur(16px);border-radius:16px;padding:14px 22px;display:flex;align-items:center;gap:14px;box-shadow:0 4px 16px rgba(0,0,0,0.08);transition:all .2s ease}
+.stat-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,210,255,0.2);border-color:#00d2ff}
 .stat-icon{font-size:22px}
 .stat-info{display:flex;flex-direction:column}
 .stat-val{font-size:16px;font-weight:700;color:" + textColor + @"}
-.stat-lbl{font-size:11.5px;color:#86868b;font-weight:500}
+.stat-lbl{font-size:11.5px;color:#8b949e;font-weight:500}
 
-/* Search Box (Brave Lion Pill Design) */
+/* Search Box */
 .search-container{width:100%;max-width:620px;margin-bottom:40px;animation:fadeInUp .5s ease}
-.search-box{display:flex;align-items:center;width:100%;height:52px;padding:0 20px;border-radius:26px;background:" + cardBg + @";border:1.5px solid " + cardBorder + @";backdrop-filter:blur(16px);box-shadow:0 4px 20px rgba(0,0,0,0.06);transition:all .25s ease}
-.search-box:hover,.search-box:focus-within{box-shadow:0 8px 30px rgba(255,80,0,0.2);border-color:#ff5000}
-.search-icon{color:#ff5000;font-size:18px;margin-right:14px}
+.search-box{display:flex;align-items:center;width:100%;height:52px;padding:0 20px;border-radius:26px;background:" + cardBg + @";border:1.5px solid " + cardBorder + @";backdrop-filter:blur(16px);box-shadow:0 4px 20px rgba(0,0,0,0.1);transition:all .25s ease}
+.search-box:hover,.search-box:focus-within{box-shadow:0 8px 32px rgba(0,210,255,0.25);border-color:#00d2ff}
+.search-icon{color:#00d2ff;font-size:18px;margin-right:14px}
 .search-box input{flex:1;background:transparent;border:none;outline:none;color:" + textColor + @";font-size:16px;font-weight:400}
-.search-box input::placeholder{color:#86868b}
-.search-box button{background:linear-gradient(135deg,#ff5000 0%,#fb542b 100%);border:none;color:#ffffff;font-weight:600;font-size:14.5px;cursor:pointer;padding:0 22px;border-radius:20px;height:38px;box-shadow:0 3px 10px rgba(255,80,0,0.3);transition:all .15s ease}
-.search-box button:hover{transform:scale(1.03);box-shadow:0 6px 16px rgba(255,80,0,0.4)}
+.search-box input::placeholder{color:#8b949e}
+.search-box button{background:linear-gradient(135deg,#00d2ff 0%,#0a84ff 100%);border:none;color:#0b0e14;font-weight:700;font-size:14.5px;cursor:pointer;padding:0 22px;border-radius:20px;height:38px;box-shadow:0 3px 10px rgba(0,210,255,0.3);transition:all .15s ease}
+.search-box button:hover{transform:scale(1.03);box-shadow:0 6px 18px rgba(0,210,255,0.45)}
 
 /* Speed Dial Grid */
 .dials-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;width:100%;max-width:640px;animation:fadeInUp .6s ease}
-.dial{display:flex;flex-direction:column;align-items:center;gap:12px;padding:18px;border-radius:18px;background:" + cardBg + @";border:1px solid " + cardBorder + @";backdrop-filter:blur(16px);cursor:pointer;transition:all .2s ease;text-decoration:none;color:" + textColor + @";box-shadow:0 2px 8px rgba(0,0,0,0.03)}
-.dial:hover{transform:translateY(-4px) scale(1.02);border-color:#ff5000;box-shadow:0 12px 32px rgba(255,80,0,0.15)}
-.dial-icon{width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:transform .2s ease}
+.dial{display:flex;flex-direction:column;align-items:center;gap:12px;padding:18px;border-radius:18px;background:" + cardBg + @";border:1px solid " + cardBorder + @";backdrop-filter:blur(16px);cursor:pointer;transition:all .2s ease;text-decoration:none;color:" + textColor + @";box-shadow:0 2px 8px rgba(0,0,0,0.04)}
+.dial:hover{transform:translateY(-4px) scale(1.02);border-color:#00d2ff;box-shadow:0 12px 32px rgba(0,210,255,0.2)}
+.dial-icon{width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,0.1);transition:transform .2s ease}
 .dial:hover .dial-icon{transform:scale(1.08)}
 .dial-label{font-size:12.5px;font-weight:600;color:" + textColor + @"}
 
 /* Footer info */
-.footer-note{margin-top:40px;font-size:12px;color:#86868b;font-weight:500;display:flex;align-items:center;gap:16px;animation:fadeIn .7s ease}
+.footer-note{margin-top:40px;font-size:12px;color:#8b949e;font-weight:500;display:flex;align-items:center;gap:16px;animation:fadeIn .7s ease}
 .footer-tag{display:flex;align-items:center;gap:6px}
 
 @keyframes fadeInDown{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
@@ -787,7 +789,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubunt
 <body>
 
 <div class='brand'>
-  <div class='brand-badge'>🦁</div>
+  <div class='brand-badge'>B</div>
   <div class='brand-title'>BLACK <span>BROWSER</span></div>
 </div>
 
@@ -795,8 +797,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubunt
   <div class='stat-card'>
     <div class='stat-icon'>🛡️</div>
     <div class='stat-info'>
-      <div class='stat-val'>Brave Shield</div>
-      <div class='stat-lbl'>Zero Ads & Trackers</div>
+      <div class='stat-val'>3-Layer Shield</div>
+      <div class='stat-lbl'>100% Site Compatible</div>
     </div>
   </div>
   <div class='stat-card'>
@@ -817,7 +819,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubunt
 
 <form class='search-container' action='https://www.google.com/search' method='get'>
   <div class='search-box'>
-    <span class='search-icon'>🦁</span>
+    <span class='search-icon'>🔍</span>
     <input type='text' name='q' placeholder='Search Google or type a URL...' autofocus autocomplete='off'>
     <button type='submit'>Search</button>
   </div>
@@ -827,17 +829,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubunt
   <a class='dial' href='https://www.google.com'><div class='dial-icon' style='background:#e8f0fe;color:#1a73e8'>G</div><div class='dial-label'>Google</div></a>
   <a class='dial' href='https://www.youtube.com'><div class='dial-icon' style='background:#fce8e6;color:#d93025'>Y</div><div class='dial-label'>YouTube</div></a>
   <a class='dial' href='https://music.youtube.com'><div class='dial-icon' style='background:#fef7e0;color:#f29900'>M</div><div class='dial-label'>YT Music</div></a>
-  <a class='dial' href='https://chromewebstore.google.com'><div class='dial-icon' style='background:#fff0eb;color:#ff5000'>🧩</div><div class='dial-label'>Chrome Store</div></a>
-  <a class='dial' href='https://github.com'><div class='dial-icon' style='background:#e8eaed;color:#202124'>GH</div><div class='dial-label'>GitHub</div></a>
+  <a class='dial' href='https://chromewebstore.google.com'><div class='dial-icon' style='background:#102a45;color:#00d2ff'>🧩</div><div class='dial-label'>Chrome Store</div></a>
+  <a class='dial' href='https://github.com'><div class='dial-icon' style='background:#1f2430;color:#f0f6fc'>GH</div><div class='dial-label'>GitHub</div></a>
   <a class='dial' href='https://reddit.com'><div class='dial-icon' style='background:#fce8e6;color:#d93025'>R</div><div class='dial-label'>Reddit</div></a>
   <a class='dial' href='https://chatgpt.com'><div class='dial-icon' style='background:#e6f4ea;color:#107c41'>AI</div><div class='dial-label'>ChatGPT</div></a>
-  <a class='dial' href='https://microsoftedge.microsoft.com/addons'><div class='dial-icon' style='background:#ebf3fc;color:#0078d4'>🛒</div><div class='dial-label'>Edge Add-ons</div></a>
+  <a class='dial' href='https://microsoftedge.microsoft.com/addons'><div class='dial-icon' style='background:#102a45;color:#00d2ff'>🛒</div><div class='dial-label'>Edge Add-ons</div></a>
 </div>
 
 <div class='footer-note'>
-  <span class='footer-tag'>🦁 Brave Light & Windows 11 Fluent UI</span>
+  <span class='footer-tag'>💻 Deep Blue-Black Laptop Flagship Edition</span>
   <span>•</span>
-  <span class='footer-tag'>👁️ Eye Care Filter Ready</span>
+  <span class='footer-tag'>👁️ Eye Care Screen Filter Ready</span>
   <span>•</span>
   <span class='footer-tag'>⚡ ~40MB Tray RAM</span>
 </div>
@@ -851,7 +853,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubunt
         private void SetupTray()
         {
             trayIcon = new NotifyIcon();
-            trayIcon.Text = "Black Browser (Brave Light)";
+            trayIcon.Text = "Black Browser (Deep Blue-Black Edition)";
 
             string iconPath = Path.Combine(Application.StartupPath, "icon.ico");
             if (File.Exists(iconPath))
