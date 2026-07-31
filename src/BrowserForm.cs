@@ -178,7 +178,7 @@ namespace BlackBrowser
             actionsPanel.Padding = new Padding(0, 2, 4, 0);
 
             menuBtn = CreateActionBtn("⋮", Color.FromArgb(255, 255, 255), Color.FromArgb(95, 99, 104), 32);
-            menuBtn.Click += (s, e) => mainMenu.Show(menuBtn, new Point(0, menuBtn.Height));
+            menuBtn.Click += (s, e) => mainMenu.Show(menuBtn, new Point(menuBtn.Width - mainMenu.Width, menuBtn.Height));
 
             addTabBtn = CreateActionBtn("+ Tab", Color.FromArgb(232, 240, 254), Color.FromArgb(0, 103, 192), 56);
             addTabBtn.Click += (s, e) => AddNewTab("New Tab", "about:blank");
@@ -580,19 +580,23 @@ namespace BlackBrowser
             mainMenu = new ContextMenuStrip();
             mainMenu.Font = new Font("Segoe UI Variable Display", 9.5f);
 
-            mainMenu.Items.Add("➕ New Tab (Ctrl+T)", null, (s, e) => AddNewTab("New Tab", "about:blank"));
-            mainMenu.Items.Add("🕵️ New Private Tab (Ctrl+Shift+P)", null, (s, e) => AddNewTab("Private Tab", "about:blank", isPrivate: true));
-            mainMenu.Items.Add("🏠 Go to Speed Dial Home", null, (s, e) => NavigateCurrentTab("about:blank"));
+            mainMenu.Items.Add("➕ New Tab (Ctrl+T)", null, (s, e) => AddNewTab("New Tab", "black://home"));
+            mainMenu.Items.Add("🕵️ New Private Tab (Ctrl+Shift+P)", null, (s, e) => AddNewTab("Private Tab", "black://home", isPrivate: true));
+            mainMenu.Items.Add("🏠 Go to Speed Dial Home", null, (s, e) => NavigateCurrentTab("black://home"));
             mainMenu.Items.Add("⭐ Local Bookmarks", null, (s, e) => NavigateCurrentTab("black://bookmarks"));
             mainMenu.Items.Add("📜 Local History (Ctrl+H)", null, (s, e) => NavigateCurrentTab("black://history"));
             mainMenu.Items.Add("📥 Local Downloads (Ctrl+J)", null, (s, e) => NavigateCurrentTab("black://downloads"));
+            mainMenu.Items.Add("🧩 Extensions Manager", null, (s, e) => NavigateCurrentTab("black://extensions"));
             mainMenu.Items.Add("🛒 Chrome Web Store", null, (s, e) => AddNewTab("Chrome Store", "https://chromewebstore.google.com"));
             mainMenu.Items.Add("🧩 Edge Add-ons Store", null, (s, e) => AddNewTab("Edge Add-ons", "https://microsoftedge.microsoft.com/addons"));
             mainMenu.Items.Add(new ToolStripSeparator());
+            mainMenu.Items.Add("↩️ Re-open Closed Tab (Ctrl+Shift+T)", null, (s, e) => ReopenLastClosedTab());
             mainMenu.Items.Add("⚡ Optimize Memory Now", null, (s, e) =>
             {
                 MemoryTrimmer.TrimProcessMemory();
-                ShowSoftCommunication("⚡ Memory Optimization Completed");
+                long ramMB = MemoryTrimmer.GetWorkingSetMB();
+                if (ramBtn != null) ramBtn.Text = "⚡ " + ramMB + "MB";
+                ShowSoftCommunication("⚡ Memory Optimization Completed — Purged Working Set");
             });
             mainMenu.Items.Add("⚙️ Settings & Device Info (Ctrl+,)", null, (s, e) => OpenSettingsDialog(0));
             mainMenu.Items.Add("📝 Dark Notes (Ctrl+Shift+N)", null, (s, e) => OpenSettingsDialog(2));
@@ -600,7 +604,7 @@ namespace BlackBrowser
             mainMenu.Items.Add("🌓 Toggle Dark / Light Theme (Ctrl+Shift+D)", null, (s, e) => ToggleTheme());
             mainMenu.Items.Add(new ToolStripSeparator());
             mainMenu.Items.Add("✕ Close Active Tab (Ctrl+W)", null, (s, e) => CloseCurrentTab());
-            mainMenu.Items.Add("🚪 Exit Browser", null, (s, e) => Application.Exit());
+            mainMenu.Items.Add("🚪 Exit Browser", null, (s, e) => ExitApp());
         }
 
         private void SetTheme(bool dark)
