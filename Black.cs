@@ -124,7 +124,7 @@ namespace BlackBrowser
 
         private EyeCareOverlayForm eyeCareOverlay;
         private int eyeCareMode = 0;
-        private bool isDarkMode = false; // Chrome Light Default
+        private bool isDarkMode = false;
 
         private CoreWebView2Environment webViewEnv;
         private int totalBlockedAds = 0;
@@ -136,12 +136,12 @@ namespace BlackBrowser
         public MainForm()
         {
             logPath = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "debug.log");
-            Log("=== Black Browser (Google Chrome Light Edition) starting ===");
+            Log("=== Black Browser Creative Edition starting ===");
 
-            this.Text = "Black (Chrome Light Edition)";
+            this.Text = "Black Browser";
             this.Width = 1280;
             this.Height = 820;
-            this.BackColor = Color.FromArgb(222, 225, 230); // Chrome Header Grey
+            this.BackColor = Color.FromArgb(222, 225, 230);
             this.MinimumSize = new Size(900, 600);
 
             string iconPath = Path.Combine(Application.StartupPath, "icon.ico");
@@ -183,30 +183,26 @@ namespace BlackBrowser
             gcTimer.Start();
         }
 
-        // ─── Google Chrome Light UI Setup ─────────────────────────────────────────
+        // ─── Creative Browser UI Setup ──────────────────────────────────────────
 
         private void InitializeUI()
         {
-            // Header Container (#DEE1E6 Chrome Light)
             headerContainer = new Panel();
             headerContainer.Dock = DockStyle.Top;
             headerContainer.Height = 82;
             headerContainer.BackColor = Color.FromArgb(222, 225, 230);
 
-            // Tab Strip Panel
             tabStripPanel = new Panel();
             tabStripPanel.Dock = DockStyle.Top;
             tabStripPanel.Height = 36;
             tabStripPanel.BackColor = Color.FromArgb(222, 225, 230);
 
-            // TabControl (Chrome Rounded Tabs)
             tabControl = new TabControl();
             tabControl.Dock = DockStyle.Fill;
             tabControl.Padding = new Point(16, 4);
             tabControl.Font = new Font("Segoe UI", 9.5f);
             tabControl.SelectedIndexChanged += OnTabChanged;
 
-            // Close Active Tab Button (Chrome style ✕ button)
             closeActiveTabBtn = new Button();
             closeActiveTabBtn.Text = "✕";
             closeActiveTabBtn.Dock = DockStyle.Right;
@@ -219,7 +215,6 @@ namespace BlackBrowser
             closeActiveTabBtn.Cursor = Cursors.Hand;
             closeActiveTabBtn.Click += (s, e) => CloseCurrentTab();
 
-            // Add Tab Button (+)
             addTabBtn = new Button();
             addTabBtn.Text = "+";
             addTabBtn.Dock = DockStyle.Right;
@@ -236,24 +231,22 @@ namespace BlackBrowser
             tabStripPanel.Controls.Add(addTabBtn);
             tabStripPanel.Controls.Add(closeActiveTabBtn);
 
-            // Omnibox Navigation Panel (Pure White Chrome Bar)
             omniboxPanel = new Panel();
             omniboxPanel.Dock = DockStyle.Bottom;
             omniboxPanel.Height = 44;
             omniboxPanel.BackColor = Color.FromArgb(255, 255, 255);
             omniboxPanel.Padding = new Padding(6, 6, 6, 6);
 
-            backBtn = CreateChromeBtn("←", "Back (Alt+Left)", 0);
-            fwdBtn = CreateChromeBtn("→", "Forward (Alt+Right)", 32);
-            reloadBtn = CreateChromeBtn("↻", "Reload (Ctrl+R)", 64);
-            homeBtn = CreateChromeBtn("🏠", "Home", 96);
+            backBtn = CreateBrowserBtn("←", "Back (Alt+Left)", 0);
+            fwdBtn = CreateBrowserBtn("→", "Forward (Alt+Right)", 32);
+            reloadBtn = CreateBrowserBtn("↻", "Reload (Ctrl+R)", 64);
+            homeBtn = CreateBrowserBtn("🏠", "Home", 96);
 
             backBtn.Click += (s, e) => { WebView2 wv = GetCurrentWebView(); if (wv != null && wv.CanGoBack) wv.GoBack(); };
             fwdBtn.Click += (s, e) => { WebView2 wv = GetCurrentWebView(); if (wv != null && wv.CanGoForward) wv.GoForward(); };
             reloadBtn.Click += (s, e) => ReloadCurrentTab();
             homeBtn.Click += (s, e) => NavigateCurrentTab("about:blank");
 
-            // Chrome Omnibox Pill (#F1F3F4)
             urlBar = new TextBox();
             urlBar.Location = new Point(136, 7);
             urlBar.Width = this.Width - 430;
@@ -274,7 +267,6 @@ namespace BlackBrowser
             };
             urlBar.Click += (s, e) => urlBar.SelectAll();
 
-            // Chrome Shield Badge (Google Blue)
             shieldBtn = new Button();
             shieldBtn.Text = "🛡 0";
             shieldBtn.Width = 62;
@@ -284,11 +276,10 @@ namespace BlackBrowser
             shieldBtn.FlatStyle = FlatStyle.Flat;
             shieldBtn.FlatAppearance.BorderSize = 0;
             shieldBtn.BackColor = Color.FromArgb(232, 240, 254);
-            shieldBtn.ForeColor = Color.FromArgb(26, 115, 232); // Chrome Blue
+            shieldBtn.ForeColor = Color.FromArgb(26, 115, 232);
             shieldBtn.Font = new Font("Segoe UI", 8.5f, FontStyle.Bold);
             shieldBtn.Cursor = Cursors.Hand;
 
-            // Eye Care Button
             eyeCareBtn = new Button();
             eyeCareBtn.Text = "👁 Eye";
             eyeCareBtn.Width = 64;
@@ -303,7 +294,6 @@ namespace BlackBrowser
             eyeCareBtn.Cursor = Cursors.Hand;
             eyeCareBtn.Click += (s, e) => CycleEyeCareMode();
 
-            // Extensions Button
             extBtn = new Button();
             extBtn.Text = "🧩 Ext";
             extBtn.Width = 64;
@@ -318,7 +308,6 @@ namespace BlackBrowser
             extBtn.Cursor = Cursors.Hand;
             extBtn.Click += (s, e) => AddNewTab("Chrome Extensions", "https://chromewebstore.google.com");
 
-            // Chrome Main Menu Button (⋮)
             menuBtn = new Button();
             menuBtn.Text = "⋮";
             menuBtn.Width = 32;
@@ -368,7 +357,7 @@ namespace BlackBrowser
             };
         }
 
-        private Button CreateChromeBtn(string text, string tooltip, int left)
+        private Button CreateBrowserBtn(string text, string tooltip, int left)
         {
             Button b = new Button();
             b.Text = text;
@@ -384,7 +373,7 @@ namespace BlackBrowser
             return b;
         }
 
-        // ─── Chrome Main Menu (⋮) ──────────────────────────────────────────────────
+        // ─── Main Browser Menu (⋮) ────────────────────────────────────────────────
 
         private void InitializeMainMenu()
         {
@@ -433,7 +422,7 @@ namespace BlackBrowser
             WebView2 wv = GetCurrentWebView();
             if (wv != null && wv.Source != null && wv.Source.ToString() == "about:blank")
             {
-                wv.CoreWebView2.NavigateToString(GetChromeSpeedDialHTML());
+                wv.CoreWebView2.NavigateToString(GetCreativeSpeedDialHTML());
             }
         }
 
@@ -459,7 +448,7 @@ namespace BlackBrowser
             }
         }
 
-        // ─── Environment Initialization with Standard Chrome User-Agent ─────────
+        // ─── Environment Initialization ──────────────────────────────────────────
 
         private async void InitializeBrowserEnv()
         {
@@ -496,7 +485,7 @@ namespace BlackBrowser
             }
         }
 
-        // ─── Tab Management (Bug-Free Clean Switching & Closing) ──────────────────
+        // ─── Tab Management ───────────────────────────────────────────────────────
 
         public async void AddNewTab(string title, string url)
         {
@@ -561,7 +550,7 @@ namespace BlackBrowser
 
             if (url == "about:blank" || string.IsNullOrEmpty(url))
             {
-                wv.CoreWebView2.NavigateToString(GetChromeSpeedDialHTML());
+                wv.CoreWebView2.NavigateToString(GetCreativeSpeedDialHTML());
             }
             else
             {
@@ -589,7 +578,7 @@ namespace BlackBrowser
                 WebView2 wv = GetCurrentWebView();
                 if (wv != null && wv.CoreWebView2 != null)
                 {
-                    wv.CoreWebView2.NavigateToString(GetChromeSpeedDialHTML());
+                    wv.CoreWebView2.NavigateToString(GetCreativeSpeedDialHTML());
                     urlBar.Text = "";
                     tabControl.SelectedTab.Text = "New Tab";
                 }
@@ -767,14 +756,14 @@ true;
 ";
         }
 
-        // ─── Google Chrome Speed Dial HTML ────────────────────────────────────────
+        // ─── Creative Speed Dial HTML ─────────────────────────────────────────────
 
-        private string GetChromeSpeedDialHTML()
+        private string GetCreativeSpeedDialHTML()
         {
-            string bg = isDarkMode ? "#202124" : "#ffffff";
-            string textColor = isDarkMode ? "#f1f3f4" : "#202124";
-            string searchBg = isDarkMode ? "#303134" : "#ffffff";
-            string searchBorder = isDarkMode ? "#5f6368" : "#dfe1e5";
+            string bg = isDarkMode ? "#121216" : "linear-gradient(180deg,#ffffff 0%,#f5f5f7 100%)";
+            string textColor = isDarkMode ? "#ffffff" : "#1d1d1f";
+            string searchBg = isDarkMode ? "#202025" : "#ffffff";
+            string searchBorder = isDarkMode ? "#303038" : "#dfe1e5";
 
             return @"<!DOCTYPE html>
 <html>
@@ -782,39 +771,39 @@ true;
 <meta charset='utf-8'>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:" + bg + @";color:" + textColor + @";display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:40px 20px;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;background:" + bg + @";color:" + textColor + @";display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:40px 20px;overflow-x:hidden;-webkit-font-smoothing:antialiased}
 
-/* Chrome Header Branding */
-.brand{font-size:48px;font-weight:700;letter-spacing:-0.5px;margin-bottom:32px;display:flex;align-items:center;gap:12px;color:" + textColor + @"}
-.brand span{color:#1a73e8}
+.time-display{font-size:54px;font-weight:300;letter-spacing:-1px;margin-bottom:8px;color:#1a73e8;user-select:none}
+.greeting{font-size:18px;font-weight:500;margin-bottom:32px;color:#80868b}
 
-/* Chrome Search Box */
-.search-container{width:100%;max-width:584px;margin-bottom:40px}
-.search-box{display:flex;align-items:center;width:100%;height:46px;padding:0 18px;border-radius:23px;background:" + searchBg + @";border:1px solid " + searchBorder + @";box-shadow:0 1px 6px rgba(32,33,36,0.12);transition:box-shadow .2s ease,border-color .2s ease}
-.search-box:hover,.search-box:focus-within{box-shadow:0 2px 10px rgba(32,33,36,0.28);border-color:transparent}
-.search-icon{color:#9aa0a6;font-size:18px;margin-right:12px}
-.search-box input{flex:1;background:transparent;border:none;outline:none;color:" + textColor + @";font-size:16px}
+.search-container{width:100%;max-width:600px;margin-bottom:44px}
+.search-box{display:flex;align-items:center;width:100%;height:52px;padding:0 20px;border-radius:26px;background:" + searchBg + @";border:1.5px solid " + searchBorder + @";box-shadow:0 4px 18px rgba(0,0,0,0.06);transition:all .25s ease}
+.search-box:hover,.search-box:focus-within{box-shadow:0 6px 28px rgba(26,115,232,0.22);border-color:#1a73e8}
+.search-icon{color:#1a73e8;font-size:18px;margin-right:14px}
+.search-box input{flex:1;background:transparent;border:none;outline:none;color:" + textColor + @";font-size:16.5px;font-weight:400}
+.search-box button{background:linear-gradient(135deg,#1a73e8 0%,#0b57d0 100%);border:none;color:#ffffff;font-weight:600;font-size:14.5px;cursor:pointer;padding:0 22px;border-radius:20px;height:38px;box-shadow:0 3px 10px rgba(26,115,232,0.3);transition:all .15s ease}
+.search-box button:hover{transform:scale(1.03);box-shadow:0 6px 16px rgba(26,115,232,0.4)}
 
-/* Chrome Speed Dial Shortcuts */
-.dials-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;width:100%;max-width:560px}
-.dial{display:flex;flex-direction:column;align-items:center;gap:12px;padding:12px;border-radius:8px;cursor:pointer;transition:background .15s ease;text-decoration:none;color:" + textColor + @"}
-.dial:hover{background:" + (isDarkMode ? "rgba(255,255,255,0.08)" : "rgba(32,33,36,0.04)") + @"}
-.dial-icon{width:48px;height:48px;border-radius:50%;background:" + (isDarkMode ? "#303134" : "#f1f3f4") + @";display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#1a73e8}
-.dial-label{font-size:12px;font-weight:500;text-align:center}
+.dials-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;width:100%;max-width:600px}
+.dial{display:flex;flex-direction:column;align-items:center;gap:12px;padding:16px;border-radius:16px;background:" + (isDarkMode ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.9)") + @";border:1px solid " + (isDarkMode ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)") + @";backdrop-filter:blur(16px);cursor:pointer;transition:all .2s ease;text-decoration:none;color:" + textColor + @";box-shadow:0 2px 8px rgba(0,0,0,0.04)}
+.dial:hover{transform:translateY(-4px) scale(1.03);border-color:#1a73e8;box-shadow:0 12px 30px rgba(26,115,232,0.15)}
+.dial-icon{width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:transform .2s ease}
+.dial:hover .dial-icon{transform:scale(1.08)}
+.dial-label{font-size:12.5px;font-weight:600}
 
-.footer-note{margin-top:48px;font-size:12px;color:#9aa0a6;display:flex;align-items:center;gap:12px}
+.footer-note{margin-top:48px;font-size:12px;color:#80868b;display:flex;align-items:center;gap:16px}
 </style>
 </head>
 <body>
 
-<div class='brand'>
-  Black <span>Browser</span>
-</div>
+<div class='time-display' id='clock'>12:00 PM</div>
+<div class='greeting'>Welcome to Black Browser</div>
 
 <form class='search-container' action='https://www.google.com/search' method='get'>
   <div class='search-box'>
     <span class='search-icon'>🔍</span>
-    <input type='text' name='q' placeholder='Search Google or type a URL' autofocus autocomplete='off'>
+    <input type='text' name='q' placeholder='Search Google or enter web address...' autofocus autocomplete='off'>
+    <button type='submit'>Search</button>
   </div>
 </form>
 
@@ -823,19 +812,33 @@ body{font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:" + bg 
   <a class='dial' href='https://www.youtube.com'><div class='dial-icon' style='background:#fce8e6;color:#d93025'>Y</div><div class='dial-label'>YouTube</div></a>
   <a class='dial' href='https://music.youtube.com'><div class='dial-icon' style='background:#fef7e0;color:#f29900'>M</div><div class='dial-label'>YT Music</div></a>
   <a class='dial' href='https://chromewebstore.google.com'><div class='dial-icon' style='background:#e8f0fe;color:#1a73e8'>🛒</div><div class='dial-label'>Chrome Store</div></a>
-  <a class='dial' href='https://github.com'><div class='dial-icon' style='background:#f1f3f4;color:#202124'>GH</div><div class='dial-label'>GitHub</div></a>
+  <a class='dial' href='https://github.com'><div class='dial-icon' style='background:#e8eaed;color:#202124'>GH</div><div class='dial-label'>GitHub</div></a>
   <a class='dial' href='https://reddit.com'><div class='dial-icon' style='background:#fce8e6;color:#d93025'>R</div><div class='dial-label'>Reddit</div></a>
   <a class='dial' href='https://chatgpt.com'><div class='dial-icon' style='background:#e6f4ea;color:#107c41'>AI</div><div class='dial-label'>ChatGPT</div></a>
   <a class='dial' href='https://microsoftedge.microsoft.com/addons'><div class='dial-icon' style='background:#e8f0fe;color:#1a73e8'>🧩</div><div class='dial-label'>Edge Add-ons</div></a>
 </div>
 
 <div class='footer-note'>
-  <span>Google Chrome Light Edition</span>
+  <span>🔒 3-Layer Ad Shield Active</span>
   <span>•</span>
-  <span>3-Layer Ad Shield Active</span>
+  <span>👁️ Eye Care Ready</span>
   <span>•</span>
-  <span>~40MB Tray RAM</span>
+  <span>⚡ ~40MB Tray Memory</span>
 </div>
+
+<script>
+function updateClock() {
+  var now = new Date();
+  var h = now.getHours();
+  var m = now.getMinutes();
+  var ampm = h >= 12 ? 'PM' : 'AM';
+  h = h % 12; h = h ? h : 12;
+  m = m < 10 ? '0' + m : m;
+  document.getElementById('clock').innerText = h + ':' + m + ' ' + ampm;
+}
+updateClock();
+setInterval(updateClock, 1000);
+</script>
 
 </body>
 </html>";
@@ -846,7 +849,7 @@ body{font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:" + bg 
         private void SetupTray()
         {
             trayIcon = new NotifyIcon();
-            trayIcon.Text = "Black Browser (Chrome Light Edition)";
+            trayIcon.Text = "Black Browser";
 
             string iconPath = Path.Combine(Application.StartupPath, "icon.ico");
             if (File.Exists(iconPath))
