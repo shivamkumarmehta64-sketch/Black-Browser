@@ -182,7 +182,7 @@ namespace BlackBrowser
             addTabBtn.Click += (s, e) => AddNewTab("New Tab", "about:blank");
 
             extBtn = CreateActionBtn("🧩 Ext", Color.FromArgb(241, 243, 244), Color.FromArgb(95, 99, 104), 64);
-            extBtn.Click += (s, e) => AddNewTab("Chrome Extensions", "https://chromewebstore.google.com");
+            extBtn.Click += (s, e) => NavigateCurrentTab("black://extensions");
 
             settingsBtn = CreateActionBtn("⚙️", Color.FromArgb(241, 243, 244), Color.FromArgb(95, 99, 104), 36);
             settingsBtn.Click += (s, e) => OpenSettingsDialog(0);
@@ -724,6 +724,19 @@ namespace BlackBrowser
                                     if (e.DownloadOperation.State == CoreWebView2DownloadState.Completed)
                                     {
                                         ShowSoftCommunication("✅ Download Complete: " + name);
+                                        if (name.EndsWith(".crx", StringComparison.OrdinalIgnoreCase) || (path != null && path.EndsWith(".crx", StringComparison.OrdinalIgnoreCase)))
+                                        {
+                                            string unpackedDir = ExtensionInstaller.UnpackCrx(path);
+                                            if (unpackedDir != null)
+                                            {
+                                                try
+                                                {
+                                                    wv.CoreWebView2.Profile.AddBrowserExtensionAsync(unpackedDir);
+                                                }
+                                                catch { }
+                                                ShowSoftCommunication("🧩 Extension Installed & Enabled: " + name);
+                                            }
+                                        }
                                     }
                                     else if (e.DownloadOperation.State == CoreWebView2DownloadState.Interrupted)
                                     {
@@ -792,6 +805,15 @@ namespace BlackBrowser
                         return;
                     }
 
+                    if (e.Uri.Equals("black://extensions", StringComparison.OrdinalIgnoreCase) ||
+                        e.Uri.Equals("about:extensions", StringComparison.OrdinalIgnoreCase))
+                    {
+                        e.Cancel = true;
+                        wv.CoreWebView2.NavigateToString(ExtensionsManager.GetExtensionsHtml(isDarkMode));
+                        if (tabControl.SelectedTab == page) { urlBar.Text = "black://extensions"; page.Text = "Extensions"; }
+                        return;
+                    }
+
                     if (tabControl.SelectedTab == page)
                     {
                         string uriStr = e.Uri;
@@ -844,6 +866,10 @@ namespace BlackBrowser
                 else if (url == "black://downloads" || url == "about:downloads")
                 {
                     wv.CoreWebView2.NavigateToString(DownloadsManager.GetDownloadsHtml(isDarkMode));
+                }
+                else if (url == "black://extensions" || url == "about:extensions")
+                {
+                    wv.CoreWebView2.NavigateToString(ExtensionsManager.GetExtensionsHtml(isDarkMode));
                 }
                 else
                 {
@@ -955,6 +981,15 @@ namespace BlackBrowser
                     wv.CoreWebView2.NavigateToString(DownloadsManager.GetDownloadsHtml(isDarkMode));
                     urlBar.Text = "black://downloads";
                     if (tabControl.SelectedTab != null) tabControl.SelectedTab.Text = "Local Downloads";
+                    return;
+                }
+
+                if (input.Equals("black://extensions", StringComparison.OrdinalIgnoreCase) ||
+                    input.Equals("about:extensions", StringComparison.OrdinalIgnoreCase))
+                {
+                    wv.CoreWebView2.NavigateToString(ExtensionsManager.GetExtensionsHtml(isDarkMode));
+                    urlBar.Text = "black://extensions";
+                    if (tabControl.SelectedTab != null) tabControl.SelectedTab.Text = "Extensions";
                     return;
                 }
 
