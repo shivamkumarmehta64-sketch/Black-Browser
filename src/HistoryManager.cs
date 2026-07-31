@@ -59,7 +59,6 @@ namespace BlackBrowser
                     string pageTitle = string.IsNullOrWhiteSpace(title) ? url : title;
                     string timeStr = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
 
-                    // Avoid duplicate consecutive visits to same URL
                     if (historyList.Count > 0 && historyList[0].Url == url)
                     {
                         historyList[0].Timestamp = timeStr;
@@ -75,7 +74,6 @@ namespace BlackBrowser
                         });
                     }
 
-                    // Keep max 1000 history items locally
                     if (historyList.Count > 1000)
                     {
                         historyList.RemoveRange(1000, historyList.Count - 1000);
@@ -117,10 +115,10 @@ namespace BlackBrowser
 
         public static string GetHistoryHtml(bool isDarkMode)
         {
-            string bg = isDarkMode ? "#121216" : "#f5f5f7";
-            string textColor = isDarkMode ? "#ffffff" : "#1d1d21";
-            string cardBg = isDarkMode ? "#1c1c24" : "#ffffff";
-            string border = isDarkMode ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)";
+            string bg = "#0b0d1b";
+            string textColor = "#ffffff";
+            string cardBg = "rgba(255, 255, 255, 0.05)";
+            string border = "rgba(255, 255, 255, 0.1)";
 
             StringBuilder sb = new StringBuilder();
             sb.Append(@"<!DOCTYPE html>
@@ -128,20 +126,19 @@ namespace BlackBrowser
 <head>
 <meta charset='utf-8'>
 <title>Local Browsing History — Black Browser</title>
+<link href='https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Inter:wght@400;500;600&display=swap' rel='stylesheet'>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:" + bg + @";color:" + textColor + @";padding:40px 20px;max-width:800px;margin:0 auto}
-.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:30px}
-.title{font-size:26px;font-weight:700;color:#1a73e8}
-.sub{font-size:13px;color:#80868b;margin-top:4px}
-.btn-clear{background:#d93025;color:#fff;border:none;padding:10px 18px;border-radius:18px;font-weight:600;cursor:pointer;font-size:13px}
-.btn-clear:hover{background:#a50e0e}
-.item{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:" + cardBg + @";border:1px solid " + border + @";border-radius:14px;margin-bottom:12px;text-decoration:none;color:inherit;transition:transform .15s ease}
-.item:hover{transform:translateY(-2px);border-color:#1a73e8}
-.item-title{font-size:15px;font-weight:600;margin-bottom:4px;color:" + textColor + @"}
-.item-url{font-size:12.5px;color:#1a73e8;word-break:break-all}
-.item-time{font-size:12px;color:#80868b;white-space:nowrap;margin-left:20px}
-.empty{text-align:center;padding:60px 0;color:#80868b;font-size:16px}
+body{font-family:'Segoe UI Variable Display','Plus Jakarta Sans','Inter',sans-serif;background:" + bg + @";color:" + textColor + @";padding:36px 24px;max-width:860px;margin:0 auto;-webkit-font-smoothing:antialiased}
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;padding-bottom:16px;border-bottom:1px solid " + border + @"}
+.title{font-size:26px;font-weight:700;background:linear-gradient(135deg, #06b6d4, #9333ea);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sub{font-size:13.5px;color:#a2a6cc;margin-top:6px}
+.item{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;background:" + cardBg + @";border:1px solid " + border + @";border-radius:16px;margin-bottom:14px;text-decoration:none;color:inherit;backdrop-filter:blur(16px);transition:all .2s ease}
+.item:hover{transform:translateY(-2px);border-color:#06b6d4;box-shadow:0 8px 24px rgba(6,182,212,0.2)}
+.item-title{font-size:15.5px;font-weight:600;margin-bottom:4px;color:" + textColor + @"}
+.item-url{font-size:13px;color:#06b6d4;word-break:break-all}
+.item-time{font-size:12px;color:#a2a6cc;white-space:nowrap;margin-left:20px;font-weight:500}
+.empty{text-align:center;padding:70px 0;color:#a2a6cc;font-size:16px}
 </style>
 </head>
 <body>
@@ -149,7 +146,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <div class='header'>
   <div>
     <div class='title'>📜 Local Browsing History</div>
-    <div class='sub'>100% Private • Saved on Device (`" + historyFilePath.Replace("\\", "/") + @"`) • No Account Required</div>
+    <div class='sub'>✨ Anime Cyberpunk Theme • 100% Private • Stored Locally on Device</div>
   </div>
 </div>
 

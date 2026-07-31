@@ -32,14 +32,14 @@ namespace BlackBrowser
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "black-webview2", "dark_notes.txt");
 
-            this.Text = "Black Browser — Settings & Dark Notes";
-            this.Width = 620;
-            this.Height = 480;
+            this.Text = "Black Browser — Settings & Dark Notes (Anime Theme)";
+            this.Width = 640;
+            this.Height = 500;
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.StartPosition = FormStartPosition.CenterParent;
-            this.BackColor = Color.FromArgb(24, 24, 28);
+            this.BackColor = Color.FromArgb(14, 16, 28);
             this.ForeColor = Color.White;
 
             InitializeComponents(currentTheme, currentEyeCare);
@@ -54,7 +54,7 @@ namespace BlackBrowser
         {
             tabControl = new TabControl();
             tabControl.Dock = DockStyle.Fill;
-            tabControl.Font = new Font("Segoe UI", 9.5f);
+            tabControl.Font = new Font("Segoe UI Variable Display", 9.5f);
             tabControl.Padding = new Point(14, 6);
 
             generalPage = new TabPage("⚙️ General & Theme");
@@ -62,25 +62,25 @@ namespace BlackBrowser
             notesPage = new TabPage("📝 Dark Notes");
             deviceInfoPage = new TabPage("💻 Device & Hardware");
 
-            generalPage.BackColor = Color.FromArgb(28, 28, 32);
-            eyeCarePage.BackColor = Color.FromArgb(28, 28, 32);
-            notesPage.BackColor = Color.FromArgb(18, 18, 22);
-            deviceInfoPage.BackColor = Color.FromArgb(28, 28, 32);
+            generalPage.BackColor = Color.FromArgb(18, 20, 34);
+            eyeCarePage.BackColor = Color.FromArgb(18, 20, 34);
+            notesPage.BackColor = Color.FromArgb(12, 14, 24);
+            deviceInfoPage.BackColor = Color.FromArgb(18, 20, 34);
 
             // ─── General & Theme Page ──────────────────────────────────────────────
             Label themeLbl = new Label();
             themeLbl.Text = "Browser Theme / Visual Style:";
             themeLbl.Location = new Point(24, 28);
             themeLbl.AutoSize = true;
-            themeLbl.Font = new Font("Segoe UI", 10f, FontStyle.Bold);
-            themeLbl.ForeColor = Color.White;
+            themeLbl.Font = new Font("Segoe UI Variable Display", 10f, FontStyle.Bold);
+            themeLbl.ForeColor = Color.FromArgb(6, 182, 212);
 
             themeCombo = new ComboBox();
             themeCombo.Location = new Point(24, 58);
-            themeCombo.Width = 320;
+            themeCombo.Width = 340;
             themeCombo.DropDownStyle = ComboBoxStyle.DropDownList;
-            themeCombo.Font = new Font("Segoe UI", 10f);
-            themeCombo.Items.Add("☀️ Google Chrome Light (Default)");
+            themeCombo.Font = new Font("Segoe UI Variable Display", 10f);
+            themeCombo.Items.Add("🌸 Anime Cyberpunk Neon Theme (Default)");
             themeCombo.Items.Add("🌙 Obsidian Dark Mode");
             themeCombo.SelectedIndex = currentTheme;
 
@@ -97,14 +97,14 @@ namespace BlackBrowser
             eyeLbl.Text = "Eye Care Overlay Filter:";
             eyeLbl.Location = new Point(24, 28);
             eyeLbl.AutoSize = true;
-            eyeLbl.Font = new Font("Segoe UI", 10f, FontStyle.Bold);
-            eyeLbl.ForeColor = Color.White;
+            eyeLbl.Font = new Font("Segoe UI Variable Display", 10f, FontStyle.Bold);
+            eyeLbl.ForeColor = Color.FromArgb(147, 51, 234);
 
             eyeCareCombo = new ComboBox();
             eyeCareCombo.Location = new Point(24, 58);
-            eyeCareCombo.Width = 320;
+            eyeCareCombo.Width = 340;
             eyeCareCombo.DropDownStyle = ComboBoxStyle.DropDownList;
-            eyeCareCombo.Font = new Font("Segoe UI", 10f);
+            eyeCareCombo.Font = new Font("Segoe UI Variable Display", 10f);
             eyeCareCombo.Items.Add("Disabled");
             eyeCareCombo.Items.Add("👁️ Warm Amber (Night Light Filter - 18%)");
             eyeCareCombo.Items.Add("🌙 Night Dimmer (Dark Screen Filter - 35%)");
@@ -120,18 +120,18 @@ namespace BlackBrowser
 
             // ─── Dark Notes Page ───────────────────────────────────────────────────
             Label notesHeader = new Label();
-            notesHeader.Text = "📝 Quick Dark Notes (Auto-Saved)";
+            notesHeader.Text = "📝 Quick Dark Notes (Auto-Saved Locally)";
             notesHeader.Dock = DockStyle.Top;
             notesHeader.Height = 32;
-            notesHeader.Font = new Font("Segoe UI", 10f, FontStyle.Bold);
-            notesHeader.ForeColor = Color.FromArgb(26, 115, 232);
+            notesHeader.Font = new Font("Segoe UI Variable Display", 10f, FontStyle.Bold);
+            notesHeader.ForeColor = Color.FromArgb(6, 182, 212);
             notesHeader.Padding = new Padding(10, 6, 0, 0);
 
             notesTextBox = new TextBox();
             notesTextBox.Dock = DockStyle.Fill;
             notesTextBox.Multiline = true;
             notesTextBox.ScrollBars = ScrollBars.Vertical;
-            notesTextBox.BackColor = Color.FromArgb(14, 14, 18);
+            notesTextBox.BackColor = Color.FromArgb(10, 12, 20);
             notesTextBox.ForeColor = Color.FromArgb(230, 235, 245);
             notesTextBox.Font = new Font("Consolas", 10.5f);
             notesTextBox.BorderStyle = BorderStyle.None;
@@ -144,9 +144,9 @@ namespace BlackBrowser
             // ─── Device Info Page ──────────────────────────────────────────────────
             sysInfoLabel = new Label();
             sysInfoLabel.Location = new Point(24, 28);
-            sysInfoLabel.Size = new Size(540, 320);
+            sysInfoLabel.Size = new Size(560, 340);
             sysInfoLabel.Font = new Font("Consolas", 9.5f);
-            sysInfoLabel.ForeColor = Color.FromArgb(200, 205, 215);
+            sysInfoLabel.ForeColor = Color.FromArgb(200, 205, 225);
 
             UpdateDeviceInfo();
 
@@ -178,7 +178,7 @@ namespace BlackBrowser
                 " RAM Usage (Working) : " + ramMB.ToString() + " MB\n" +
                 " Framework Runtime   : .NET Framework " + Environment.Version.ToString() + "\n" +
                 " Rendering Engine    : Microsoft WebView2 (Chromium 128)\n" +
-                " User-Agent          : Chrome 128 Windows 10/11 Compatible\n" +
+                " Visual Theme        : Anime Cyberpunk Neon Edition\n" +
                 " 3-Layer Ad Shield   : Active\n" +
                 "==========================================================";
         }
