@@ -65,7 +65,7 @@ body{font-family:'Outfit','Inter',-apple-system,BlinkMacSystemFont,sans-serif;ba
 <div class='clock-container'>
   <div class='time-display' id='clock'>12:00 PM</div>
   <div class='greeting' id='greeting'>Welcome to Black Browser</div>
-  <div class='ai-status-badge'>✨ AI Optimized • System Performance Peak</div>
+  <div class='ai-status-badge'>✨ 100% Local Privacy • Zero Account Sign-in Required</div>
 </div>
 
 <form class='search-container' action='https://www.google.com/search' method='get'>
@@ -88,9 +88,9 @@ body{font-family:'Outfit','Inter',-apple-system,BlinkMacSystemFont,sans-serif;ba
 </div>
 
 <div class='features-bar'>
+  <a class='feature-pill' href='black://history'>📜 Local History</a>
   <a class='feature-pill' href='https://chatgpt.com'>🤖 ChatGPT AI</a>
   <a class='feature-pill' href='https://chromewebstore.google.com'>🧩 Extensions</a>
-  <a class='feature-pill' href='https://myactivity.google.com'>📜 History</a>
   <a class='feature-pill' href='https://microsoftedge.microsoft.com/addons'>🛒 Edge Store</a>
 </div>
 
@@ -110,9 +110,9 @@ function updateClock() {
   var ampm = h >= 12 ? 'PM' : 'AM';
   
   var greet = 'Welcome to Black Browser';
-  if (h < 12) greet = 'Good Morning, Shiva — System Optimal';
-  else if (h < 18) greet = 'Good Afternoon, Shiva — System Optimal';
-  else greet = 'Good Evening, Shiva — System Optimal';
+  if (h < 12) greet = 'Good Morning, Shiva — Local Privacy Active';
+  else if (h < 18) greet = 'Good Afternoon, Shiva — Local Privacy Active';
+  else greet = 'Good Evening, Shiva — Local Privacy Active';
 
   h = h % 12; h = h ? h : 12;
   m = m < 10 ? '0' + m : m;

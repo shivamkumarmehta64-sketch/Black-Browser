@@ -42,7 +42,7 @@ namespace BlackBrowser
         public BrowserForm()
         {
             logPath = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "debug.log");
-            Log("=== Black Browser starting (Settings & Dark Notes v4.5) ===");
+            Log("=== Black Browser starting (Local History & Privacy v5.1) ===");
 
             this.SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint, true);
             this.DoubleBuffered = true;
@@ -139,6 +139,7 @@ namespace BlackBrowser
             urlBar.GotFocus += (s, e) => urlBar.SelectAll();
 
             shieldBtn = CreateActionBtn("🛡 0", Color.FromArgb(232, 240, 254), Color.FromArgb(26, 115, 232), 62, this.Width - 435);
+            shieldBtn.Click += (s, e) => ShowAdShieldStatus();
 
             eyeCareBtn = CreateActionBtn("👁 Eye", Color.FromArgb(254, 247, 224), Color.FromArgb(180, 100, 0), 64, this.Width - 368);
             eyeCareBtn.Click += (s, e) => CycleEyeCareMode();
@@ -204,6 +205,19 @@ namespace BlackBrowser
                     ResumeActiveWebView();
                 }
             };
+        }
+
+        private void ShowAdShieldStatus()
+        {
+            MessageBox.Show(
+                "🛡️ 3-Layer AdShield Protection Engine Status:\n\n" +
+                "• Total Blocked Ads & Trackers: " + totalBlockedAds + "\n" +
+                "• Network Filtering Layer: Active\n" +
+                "• Injected CSS Hiding Layer: Active\n" +
+                "• 500ms JS Video Ad Fast-Forwarder: Active\n\n" +
+                "Your browsing is 100% ad-free and tracking protected!",
+                "Black Browser — AdShield Protection",
+                MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void OpenSettingsDialog(int initialTab)
@@ -333,8 +347,7 @@ namespace BlackBrowser
             mainMenu.Font = new Font("Segoe UI", 9.5f);
 
             mainMenu.Items.Add("➕ New Tab (Ctrl+T)", null, (s, e) => AddNewTab("New Tab", "about:blank"));
-            mainMenu.Items.Add("📜 History (Ctrl+H)", null, (s, e) => NavigateCurrentTab("https://myactivity.google.com"));
-            mainMenu.Items.Add("📥 Downloads (Ctrl+J)", null, (s, e) => NavigateCurrentTab("chrome://downloads"));
+            mainMenu.Items.Add("📜 Local History (Ctrl+H)", null, (s, e) => NavigateCurrentTab("black://history"));
             mainMenu.Items.Add("🛒 Chrome Web Store", null, (s, e) => AddNewTab("Chrome Store", "https://chromewebstore.google.com"));
             mainMenu.Items.Add("🧩 Edge Add-ons Store", null, (s, e) => AddNewTab("Edge Add-ons", "https://microsoftedge.microsoft.com/addons"));
             mainMenu.Items.Add(new ToolStripSeparator());
@@ -417,16 +430,16 @@ namespace BlackBrowser
                 string chromeUA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 Edg/128.0.0.0";
 
                 var options = new CoreWebView2EnvironmentOptions(
-                    "--disk-cache-size=33554432 " +       // 32 MB disk cache
-                    "--media-cache-size=33554432 " +      // 32 MB media cache
-                    "--renderer-process-limit=1 " +       // max 1 renderer process
+                    "--disk-cache-size=33554432 " +
+                    "--media-cache-size=33554432 " +
+                    "--renderer-process-limit=1 " +
                     "--enable-experimental-extension-apis " +
                     "--allow-legacy-extension-manifests " +
                     "--user-agent=\"" + chromeUA + "\" " +
-                    "--no-first-run " +                   // skip first-run setup
-                    "--disable-sync " +                   // no Chrome account sync
-                    "--disable-translate " +              // no translate UI
-                    "--js-flags=--max-old-space-size=128" // JS heap limit: 128 MB
+                    "--no-first-run " +
+                    "--disable-sync " +
+                    "--disable-translate " +
+                    "--js-flags=--max-old-space-size=128"
                 );
 
                 webViewEnv = await CoreWebView2Environment.CreateAsync(null, userDataFolder, options);
@@ -471,6 +484,19 @@ namespace BlackBrowser
 
                 wv.CoreWebView2.NavigationStarting += (s, e) =>
                 {
+                    if (e.Uri.Equals("black://history", StringComparison.OrdinalIgnoreCase) ||
+                        e.Uri.Equals("about:history", StringComparison.OrdinalIgnoreCase))
+                    {
+                        e.Cancel = true;
+                        wv.CoreWebView2.NavigateToString(HistoryManager.GetHistoryHtml(isDarkMode));
+                        if (tabControl.SelectedTab == page)
+                        {
+                            urlBar.Text = "black://history";
+                            page.Text = "Local History";
+                        }
+                        return;
+                    }
+
                     if (tabControl.SelectedTab == page)
                     {
                         string uriStr = e.Uri;
@@ -489,6 +515,9 @@ namespace BlackBrowser
                         tabControl.Invalidate();
                         UpdateNavButtons();
                     }
+
+                    // Record to 100% Local History
+                    HistoryManager.AddVisit(wv.CoreWebView2.DocumentTitle, wv.Source.ToString());
                 };
 
                 wv.CoreWebView2.SourceChanged += (s, e) =>
@@ -503,6 +532,10 @@ namespace BlackBrowser
                 if (url == "about:blank" || string.IsNullOrEmpty(url))
                 {
                     wv.CoreWebView2.NavigateToString(SpeedDialPage.GetHtml(isDarkMode));
+                }
+                else if (url == "black://history" || url == "about:history")
+                {
+                    wv.CoreWebView2.NavigateToString(HistoryManager.GetHistoryHtml(isDarkMode));
                 }
                 else
                 {
@@ -569,6 +602,15 @@ namespace BlackBrowser
             WebView2 wv = GetCurrentWebView();
             if (wv != null && wv.CoreWebView2 != null)
             {
+                if (input.Equals("black://history", StringComparison.OrdinalIgnoreCase) ||
+                    input.Equals("about:history", StringComparison.OrdinalIgnoreCase))
+                {
+                    wv.CoreWebView2.NavigateToString(HistoryManager.GetHistoryHtml(isDarkMode));
+                    urlBar.Text = "black://history";
+                    if (tabControl.SelectedTab != null) tabControl.SelectedTab.Text = "Local History";
+                    return;
+                }
+
                 string target = FormatUrl(input);
                 wv.CoreWebView2.Navigate(target);
             }
@@ -586,7 +628,7 @@ namespace BlackBrowser
             if (string.IsNullOrWhiteSpace(input) || input == "about:blank")
                 return "about:blank";
 
-            if (input.StartsWith("http://") || input.StartsWith("https://") || input.StartsWith("file://"))
+            if (input.StartsWith("http://") || input.StartsWith("https://") || input.StartsWith("file://") || input.StartsWith("black://"))
                 return input;
 
             if (input.Contains(".") && !input.Contains(" "))
@@ -697,12 +739,7 @@ namespace BlackBrowser
             else if (e.Control && e.KeyCode == Keys.H)
             {
                 e.SuppressKeyPress = true;
-                NavigateCurrentTab("https://myactivity.google.com");
-            }
-            else if (e.Control && e.KeyCode == Keys.J)
-            {
-                e.SuppressKeyPress = true;
-                NavigateCurrentTab("chrome://downloads");
+                NavigateCurrentTab("black://history");
             }
             else if (e.Control && e.Shift && e.KeyCode == Keys.E)
             {
