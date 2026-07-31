@@ -1,6 +1,7 @@
-﻿.gitignore
-node_modules/
-dist/
 *.exe
-.DS_Store
-
+*.exe.config
+*.pdb
+debug.log
+*.user
+*.suo
+node_modules/
