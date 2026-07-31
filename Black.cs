@@ -16,21 +16,31 @@ namespace BlackBrowser
     {
         private static Mutex mutex = null;
 
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        public static extern uint RegisterWindowMessage(string lpString);
+
         [DllImport("user32.dll")]
-        private static extern bool SetForegroundWindow(IntPtr hWnd);
+        public static extern bool PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+
         [DllImport("user32.dll")]
-        private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+        public static extern bool SetForegroundWindow(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        public static readonly IntPtr HWND_BROADCAST = (IntPtr)0xffff;
+        public static readonly uint WM_SHOW_BLACK_BROWSER = RegisterWindowMessage("WM_SHOW_BLACK_BROWSER_9b2d0d52");
 
         [STAThread]
         static void Main()
         {
-            const string appName = "Black_SingleInstance_Mutex_9b2d0d52";
             bool createdNew;
-
-            mutex = new Mutex(true, appName, out createdNew);
+            mutex = new Mutex(true, "Black_SingleInstance_Mutex_9b2d0d52", out createdNew);
 
             if (!createdNew)
             {
+                PostMessage(HWND_BROADCAST, WM_SHOW_BLACK_BROWSER, IntPtr.Zero, IntPtr.Zero);
+
                 Process current = Process.GetCurrentProcess();
                 foreach (Process process in Process.GetProcessesByName(current.ProcessName))
                 {
@@ -102,7 +112,6 @@ namespace BlackBrowser
     public class MainForm : Form
     {
         private Panel headerContainer;
-        private Panel tabStripPanel;
         private Panel omniboxPanel;
         private TabControl tabControl;
 
@@ -116,7 +125,6 @@ namespace BlackBrowser
         private Button extBtn;
         private Button menuBtn;
         private Button addTabBtn;
-        private Button closeActiveTabBtn;
 
         private ContextMenuStrip mainMenu;
         private NotifyIcon trayIcon;
@@ -136,13 +144,14 @@ namespace BlackBrowser
         public MainForm()
         {
             logPath = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "debug.log");
-            Log("=== Black Browser Creative Edition starting ===");
+            Log("=== Black Browser starting ===");
 
             this.Text = "Black Browser";
             this.Width = 1280;
             this.Height = 820;
             this.BackColor = Color.FromArgb(222, 225, 230);
             this.MinimumSize = new Size(900, 600);
+            this.StartPosition = FormStartPosition.CenterScreen;
 
             string iconPath = Path.Combine(Application.StartupPath, "icon.ico");
             if (File.Exists(iconPath))
@@ -154,7 +163,21 @@ namespace BlackBrowser
             InitializeMainMenu();
             SetupTray();
             SetupGCTimer();
+
+            this.Show();
+            this.BringToFront();
+            this.Activate();
+
             InitializeBrowserEnv();
+        }
+
+        protected override void WndProc(ref Message m)
+        {
+            if (m.Msg == Program.WM_SHOW_BLACK_BROWSER)
+            {
+                ShowMainWindow();
+            }
+            base.WndProc(ref m);
         }
 
         private void Log(string msg)
@@ -183,64 +206,24 @@ namespace BlackBrowser
             gcTimer.Start();
         }
 
-        // ─── Creative Browser UI Setup ──────────────────────────────────────────
+        // ─── UI Setup ─────────────────────────────────────────────────────────────
 
         private void InitializeUI()
         {
             headerContainer = new Panel();
             headerContainer.Dock = DockStyle.Top;
-            headerContainer.Height = 82;
+            headerContainer.Height = 44;
             headerContainer.BackColor = Color.FromArgb(222, 225, 230);
 
-            tabStripPanel = new Panel();
-            tabStripPanel.Dock = DockStyle.Top;
-            tabStripPanel.Height = 36;
-            tabStripPanel.BackColor = Color.FromArgb(222, 225, 230);
-
-            tabControl = new TabControl();
-            tabControl.Dock = DockStyle.Fill;
-            tabControl.Padding = new Point(16, 4);
-            tabControl.Font = new Font("Segoe UI", 9.5f);
-            tabControl.SelectedIndexChanged += OnTabChanged;
-
-            closeActiveTabBtn = new Button();
-            closeActiveTabBtn.Text = "✕";
-            closeActiveTabBtn.Dock = DockStyle.Right;
-            closeActiveTabBtn.Width = 32;
-            closeActiveTabBtn.FlatStyle = FlatStyle.Flat;
-            closeActiveTabBtn.FlatAppearance.BorderSize = 0;
-            closeActiveTabBtn.BackColor = Color.FromArgb(222, 225, 230);
-            closeActiveTabBtn.ForeColor = Color.FromArgb(95, 99, 104);
-            closeActiveTabBtn.Font = new Font("Segoe UI", 10f, FontStyle.Bold);
-            closeActiveTabBtn.Cursor = Cursors.Hand;
-            closeActiveTabBtn.Click += (s, e) => CloseCurrentTab();
-
-            addTabBtn = new Button();
-            addTabBtn.Text = "+";
-            addTabBtn.Dock = DockStyle.Right;
-            addTabBtn.Width = 32;
-            addTabBtn.FlatStyle = FlatStyle.Flat;
-            addTabBtn.FlatAppearance.BorderSize = 0;
-            addTabBtn.BackColor = Color.FromArgb(222, 225, 230);
-            addTabBtn.ForeColor = Color.FromArgb(60, 64, 67);
-            addTabBtn.Font = new Font("Segoe UI", 12f, FontStyle.Bold);
-            addTabBtn.Cursor = Cursors.Hand;
-            addTabBtn.Click += (s, e) => AddNewTab("New Tab", "about:blank");
-
-            tabStripPanel.Controls.Add(tabControl);
-            tabStripPanel.Controls.Add(addTabBtn);
-            tabStripPanel.Controls.Add(closeActiveTabBtn);
-
             omniboxPanel = new Panel();
-            omniboxPanel.Dock = DockStyle.Bottom;
-            omniboxPanel.Height = 44;
+            omniboxPanel.Dock = DockStyle.Fill;
             omniboxPanel.BackColor = Color.FromArgb(255, 255, 255);
             omniboxPanel.Padding = new Padding(6, 6, 6, 6);
 
-            backBtn = CreateBrowserBtn("←", "Back (Alt+Left)", 0);
-            fwdBtn = CreateBrowserBtn("→", "Forward (Alt+Right)", 32);
-            reloadBtn = CreateBrowserBtn("↻", "Reload (Ctrl+R)", 64);
-            homeBtn = CreateBrowserBtn("🏠", "Home", 96);
+            backBtn = CreateChromeBtn("←", "Back (Alt+Left)", 0);
+            fwdBtn = CreateChromeBtn("→", "Forward (Alt+Right)", 32);
+            reloadBtn = CreateChromeBtn("↻", "Reload (Ctrl+R)", 64);
+            homeBtn = CreateChromeBtn("🏠", "Home", 96);
 
             backBtn.Click += (s, e) => { WebView2 wv = GetCurrentWebView(); if (wv != null && wv.CanGoBack) wv.GoBack(); };
             fwdBtn.Click += (s, e) => { WebView2 wv = GetCurrentWebView(); if (wv != null && wv.CanGoForward) wv.GoForward(); };
@@ -249,7 +232,7 @@ namespace BlackBrowser
 
             urlBar = new TextBox();
             urlBar.Location = new Point(136, 7);
-            urlBar.Width = this.Width - 430;
+            urlBar.Width = this.Width - 460;
             urlBar.Height = 28;
             urlBar.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
             urlBar.BackColor = Color.FromArgb(241, 243, 244);
@@ -266,13 +249,14 @@ namespace BlackBrowser
                 }
             };
             urlBar.Click += (s, e) => urlBar.SelectAll();
+            urlBar.GotFocus += (s, e) => urlBar.SelectAll();
 
             shieldBtn = new Button();
             shieldBtn.Text = "🛡 0";
             shieldBtn.Width = 62;
             shieldBtn.Height = 28;
             shieldBtn.Anchor = AnchorStyles.Right | AnchorStyles.Top;
-            shieldBtn.Location = new Point(this.Width - 285, 6);
+            shieldBtn.Location = new Point(this.Width - 315, 6);
             shieldBtn.FlatStyle = FlatStyle.Flat;
             shieldBtn.FlatAppearance.BorderSize = 0;
             shieldBtn.BackColor = Color.FromArgb(232, 240, 254);
@@ -285,7 +269,7 @@ namespace BlackBrowser
             eyeCareBtn.Width = 64;
             eyeCareBtn.Height = 28;
             eyeCareBtn.Anchor = AnchorStyles.Right | AnchorStyles.Top;
-            eyeCareBtn.Location = new Point(this.Width - 218, 6);
+            eyeCareBtn.Location = new Point(this.Width - 248, 6);
             eyeCareBtn.FlatStyle = FlatStyle.Flat;
             eyeCareBtn.FlatAppearance.BorderSize = 0;
             eyeCareBtn.BackColor = Color.FromArgb(254, 247, 224);
@@ -299,7 +283,7 @@ namespace BlackBrowser
             extBtn.Width = 64;
             extBtn.Height = 28;
             extBtn.Anchor = AnchorStyles.Right | AnchorStyles.Top;
-            extBtn.Location = new Point(this.Width - 149, 6);
+            extBtn.Location = new Point(this.Width - 179, 6);
             extBtn.FlatStyle = FlatStyle.Flat;
             extBtn.FlatAppearance.BorderSize = 0;
             extBtn.BackColor = Color.FromArgb(241, 243, 244);
@@ -308,12 +292,26 @@ namespace BlackBrowser
             extBtn.Cursor = Cursors.Hand;
             extBtn.Click += (s, e) => AddNewTab("Chrome Extensions", "https://chromewebstore.google.com");
 
+            addTabBtn = new Button();
+            addTabBtn.Text = "+ Tab";
+            addTabBtn.Width = 56;
+            addTabBtn.Height = 28;
+            addTabBtn.Anchor = AnchorStyles.Right | AnchorStyles.Top;
+            addTabBtn.Location = new Point(this.Width - 110, 6);
+            addTabBtn.FlatStyle = FlatStyle.Flat;
+            addTabBtn.FlatAppearance.BorderSize = 0;
+            addTabBtn.BackColor = Color.FromArgb(232, 240, 254);
+            addTabBtn.ForeColor = Color.FromArgb(26, 115, 232);
+            addTabBtn.Font = new Font("Segoe UI", 9f, FontStyle.Bold);
+            addTabBtn.Cursor = Cursors.Hand;
+            addTabBtn.Click += (s, e) => AddNewTab("New Tab", "about:blank");
+
             menuBtn = new Button();
             menuBtn.Text = "⋮";
             menuBtn.Width = 32;
             menuBtn.Height = 28;
             menuBtn.Anchor = AnchorStyles.Right | AnchorStyles.Top;
-            menuBtn.Location = new Point(this.Width - 80, 6);
+            menuBtn.Location = new Point(this.Width - 48, 6);
             menuBtn.FlatStyle = FlatStyle.Flat;
             menuBtn.FlatAppearance.BorderSize = 0;
             menuBtn.BackColor = Color.FromArgb(255, 255, 255);
@@ -330,11 +328,22 @@ namespace BlackBrowser
             omniboxPanel.Controls.Add(shieldBtn);
             omniboxPanel.Controls.Add(eyeCareBtn);
             omniboxPanel.Controls.Add(extBtn);
+            omniboxPanel.Controls.Add(addTabBtn);
             omniboxPanel.Controls.Add(menuBtn);
 
-            headerContainer.Controls.Add(tabStripPanel);
             headerContainer.Controls.Add(omniboxPanel);
 
+            // Tab Control
+            tabControl = new TabControl();
+            tabControl.Dock = DockStyle.Fill;
+            tabControl.Padding = new Point(14, 4);
+            tabControl.Font = new Font("Segoe UI", 9.5f);
+            tabControl.DrawMode = TabDrawMode.OwnerDrawFixed;
+            tabControl.DrawItem += OnDrawTabItem;
+            tabControl.MouseDown += OnTabMouseDown;
+            tabControl.SelectedIndexChanged += OnTabChanged;
+
+            this.Controls.Add(tabControl);
             this.Controls.Add(headerContainer);
 
             this.KeyPreview = true;
@@ -343,7 +352,7 @@ namespace BlackBrowser
             this.Resize += (s, e) =>
             {
                 if (urlBar != null)
-                    urlBar.Width = Math.Max(200, this.Width - 430);
+                    urlBar.Width = Math.Max(200, this.Width - 460);
 
                 if (this.WindowState == FormWindowState.Minimized)
                 {
@@ -357,7 +366,76 @@ namespace BlackBrowser
             };
         }
 
-        private Button CreateBrowserBtn(string text, string tooltip, int left)
+        private void OnDrawTabItem(object sender, DrawItemEventArgs e)
+        {
+            TabPage page = tabControl.TabPages[e.Index];
+            Rectangle rect = tabControl.GetTabRect(e.Index);
+            bool selected = (tabControl.SelectedIndex == e.Index);
+
+            Color backColor = selected ? Color.FromArgb(255, 255, 255) : Color.FromArgb(230, 233, 238);
+            using (SolidBrush b = new SolidBrush(backColor))
+            {
+                e.Graphics.FillRectangle(b, rect);
+            }
+
+            if (selected)
+            {
+                using (Pen p = new Pen(Color.FromArgb(26, 115, 232), 2))
+                {
+                    e.Graphics.DrawLine(p, rect.Left, rect.Top, rect.Right, rect.Top);
+                }
+            }
+
+            TextRenderer.DrawText(e.Graphics, page.Text, tabControl.Font,
+                new Rectangle(rect.X + 6, rect.Y + 4, rect.Width - 24, rect.Height - 4),
+                selected ? Color.FromArgb(32, 33, 36) : Color.FromArgb(95, 99, 104),
+                TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
+
+            Rectangle closeRect = new Rectangle(rect.Right - 20, rect.Y + (rect.Height - 14) / 2, 14, 14);
+            using (Font f = new Font("Segoe UI", 8.5f, FontStyle.Bold))
+            {
+                TextRenderer.DrawText(e.Graphics, "✕", f, closeRect,
+                    Color.FromArgb(120, 120, 120), TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+            }
+        }
+
+        private void OnTabMouseDown(object sender, MouseEventArgs e)
+        {
+            for (int i = 0; i < tabControl.TabPages.Count; i++)
+            {
+                Rectangle rect = tabControl.GetTabRect(i);
+                Rectangle closeRect = new Rectangle(rect.Right - 20, rect.Y + (rect.Height - 14) / 2, 14, 14);
+
+                if (closeRect.Contains(e.Location))
+                {
+                    CloseTabAtIndex(i);
+                    break;
+                }
+            }
+        }
+
+        private void CloseTabAtIndex(int index)
+        {
+            if (tabControl.TabPages.Count > 1)
+            {
+                TabPage page = tabControl.TabPages[index];
+                WebView2 wv = GetWebView(page);
+                if (wv != null) wv.Dispose();
+                tabControl.TabPages.Remove(page);
+            }
+            else
+            {
+                WebView2 wv = GetCurrentWebView();
+                if (wv != null && wv.CoreWebView2 != null)
+                {
+                    wv.CoreWebView2.NavigateToString(GetCreativeSpeedDialHTML());
+                    urlBar.Text = "";
+                    tabControl.SelectedTab.Text = "New Tab";
+                }
+            }
+        }
+
+        private Button CreateChromeBtn(string text, string tooltip, int left)
         {
             Button b = new Button();
             b.Text = text;
@@ -373,7 +451,7 @@ namespace BlackBrowser
             return b;
         }
 
-        // ─── Main Browser Menu (⋮) ────────────────────────────────────────────────
+        // ─── Main Menu (⋮) ────────────────────────────────────────────────────────
 
         private void InitializeMainMenu()
         {
@@ -399,23 +477,17 @@ namespace BlackBrowser
             if (isDarkMode)
             {
                 headerContainer.BackColor = Color.FromArgb(32, 33, 36);
-                tabStripPanel.BackColor = Color.FromArgb(32, 33, 36);
                 omniboxPanel.BackColor = Color.FromArgb(40, 42, 45);
                 urlBar.BackColor = Color.FromArgb(53, 54, 58);
                 urlBar.ForeColor = Color.White;
-                addTabBtn.BackColor = Color.FromArgb(32, 33, 36);
-                closeActiveTabBtn.BackColor = Color.FromArgb(32, 33, 36);
                 this.BackColor = Color.FromArgb(20, 20, 22);
             }
             else
             {
                 headerContainer.BackColor = Color.FromArgb(222, 225, 230);
-                tabStripPanel.BackColor = Color.FromArgb(222, 225, 230);
                 omniboxPanel.BackColor = Color.FromArgb(255, 255, 255);
                 urlBar.BackColor = Color.FromArgb(241, 243, 244);
                 urlBar.ForeColor = Color.FromArgb(32, 33, 36);
-                addTabBtn.BackColor = Color.FromArgb(222, 225, 230);
-                closeActiveTabBtn.BackColor = Color.FromArgb(222, 225, 230);
                 this.BackColor = Color.FromArgb(249, 249, 251);
             }
 
@@ -528,16 +600,21 @@ namespace BlackBrowser
             wv.CoreWebView2.NavigationStarting += (s, e) =>
             {
                 if (tabControl.SelectedTab == page)
-                    urlBar.Text = e.Uri;
+                {
+                    string uriStr = e.Uri;
+                    urlBar.Text = uriStr == "about:blank" ? "" : uriStr;
+                }
             };
 
             wv.CoreWebView2.NavigationCompleted += (s, e) =>
             {
                 if (tabControl.SelectedTab == page)
                 {
-                    urlBar.Text = wv.Source.ToString();
+                    string uriStr = wv.Source.ToString();
+                    urlBar.Text = uriStr == "about:blank" ? "" : uriStr;
                     page.Text = string.IsNullOrEmpty(wv.CoreWebView2.DocumentTitle)
                         ? "Tab" : TruncateTitle(wv.CoreWebView2.DocumentTitle);
+                    tabControl.Invalidate();
                     UpdateNavButtons();
                 }
             };
@@ -545,7 +622,10 @@ namespace BlackBrowser
             wv.CoreWebView2.SourceChanged += (s, e) =>
             {
                 if (tabControl.SelectedTab == page)
-                    urlBar.Text = wv.Source.ToString();
+                {
+                    string uriStr = wv.Source.ToString();
+                    urlBar.Text = uriStr == "about:blank" ? "" : uriStr;
+                }
             };
 
             if (url == "about:blank" || string.IsNullOrEmpty(url))
@@ -566,23 +646,8 @@ namespace BlackBrowser
 
         private void CloseCurrentTab()
         {
-            if (tabControl.TabPages.Count > 1)
-            {
-                TabPage current = tabControl.SelectedTab;
-                WebView2 wv = GetWebView(current);
-                if (wv != null) wv.Dispose();
-                tabControl.TabPages.Remove(current);
-            }
-            else
-            {
-                WebView2 wv = GetCurrentWebView();
-                if (wv != null && wv.CoreWebView2 != null)
-                {
-                    wv.CoreWebView2.NavigateToString(GetCreativeSpeedDialHTML());
-                    urlBar.Text = "";
-                    tabControl.SelectedTab.Text = "New Tab";
-                }
-            }
+            if (tabControl.SelectedIndex >= 0)
+                CloseTabAtIndex(tabControl.SelectedIndex);
         }
 
         private WebView2 GetCurrentWebView()
@@ -606,7 +671,8 @@ namespace BlackBrowser
             WebView2 wv = GetCurrentWebView();
             if (wv != null && wv.CoreWebView2 != null)
             {
-                urlBar.Text = wv.Source.ToString() == "about:blank" ? "" : wv.Source.ToString();
+                string uriStr = wv.Source.ToString();
+                urlBar.Text = uriStr == "about:blank" ? "" : uriStr;
                 UpdateNavButtons();
             }
         }
@@ -669,19 +735,35 @@ namespace BlackBrowser
                 wv.CoreWebView2.Resume();
         }
 
-        // ─── Network Ad-Blocking ──────────────────────────────────────────────────
+        public void ShowMainWindow()
+        {
+            if (this.InvokeRequired)
+            {
+                this.Invoke((Action)ShowMainWindow);
+                return;
+            }
+            this.Visible = true;
+            this.Show();
+            if (this.WindowState == FormWindowState.Minimized)
+                this.WindowState = FormWindowState.Normal;
+            this.ShowInTaskbar = true;
+            this.BringToFront();
+            this.Activate();
+            Program.SetForegroundWindow(this.Handle);
+        }
+
+        // ─── Network Ad-Blocking (Allows Google Ad Redirect Links) ────────────────
 
         private void SetupNetworkBlocking(WebView2 wv)
         {
             string[] adDomains = {
-                "doubleclick.net", "googlesyndication.com", "googleadservices.com",
+                "doubleclick.net", "googlesyndication.com",
                 "2mdn.net", "moatads.com", "adnxs.com", "advertising.com",
                 "taboola.com", "outbrain.com", "scorecardresearch.com",
                 "hotjar.com", "mixpanel.com", "bat.bing.com", "demdex.net",
                 "bluekai.com", "criteo.com", "adsrvr.org", "pubmatic.com",
                 "rubiconproject.com", "openx.net", "amazon-adsystem.com",
-                "connect.facebook.net", "an.facebook.com", "google-analytics.com",
-                "adservice.google.com", "adservice.google.co.in",
+                "connect.facebook.net", "an.facebook.com",
                 "googleads.g.doubleclick.net", "pubads.g.doubleclick.net"
             };
 
@@ -872,13 +954,6 @@ setInterval(updateClock, 1000);
                 if (e.Button == MouseButtons.Left)
                     ShowMainWindow();
             };
-        }
-
-        private void ShowMainWindow()
-        {
-            this.Show();
-            this.WindowState = FormWindowState.Normal;
-            this.Activate();
         }
 
         // ─── Keyboard Shortcuts ───────────────────────────────────────────────────
