@@ -18,7 +18,7 @@ if not exist "%CSC%" (
 )
 
 echo [1/2] Compiling src\*.cs...
-"%CSC%" /nologo /target:winexe /reference:System.IO.Compression.FileSystem.dll /reference:System.IO.Compression.dll /reference:Microsoft.Web.WebView2.Core.dll /reference:Microsoft.Web.WebView2.WinForms.dll /out:Black.exe src\*.cs
+"%CSC%" /nologo /target:winexe /win32icon:icon.ico /reference:System.IO.Compression.FileSystem.dll /reference:System.IO.Compression.dll /reference:Microsoft.Web.WebView2.Core.dll /reference:Microsoft.Web.WebView2.WinForms.dll /out:Black.exe src\*.cs
 
 if errorlevel 1 (
     echo [ERROR] Compilation failed. Check error messages above.
