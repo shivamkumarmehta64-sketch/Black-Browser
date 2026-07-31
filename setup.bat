@@ -4,17 +4,21 @@ echo ========================================================
 echo             Black Browser - Setup Build
 echo ========================================================
 echo.
+echo [INFO] Compiling from src\ (v8.2 codebase)...
+echo.
 
 set "CSC=C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe"
 
 if not exist "%CSC%" (
     echo [ERROR] .NET Framework 4.8 compiler (csc.exe) not found.
+    echo        Install .NET Framework 4.8 from:
+    echo        https://dotnet.microsoft.com/download/dotnet-framework/net48
     pause
     exit /b 1
 )
 
-echo [1/2] Compiling Black.cs...
-"%CSC%" /nologo /target:winexe /reference:Microsoft.Web.WebView2.Core.dll /reference:Microsoft.Web.WebView2.WinForms.dll /out:Black.exe Black.cs
+echo [1/2] Compiling src\*.cs...
+"%CSC%" /nologo /target:winexe /reference:Microsoft.Web.WebView2.Core.dll /reference:Microsoft.Web.WebView2.WinForms.dll /out:Black.exe src\*.cs
 
 if errorlevel 1 (
     echo [ERROR] Compilation failed. Check error messages above.
@@ -32,7 +36,7 @@ powershell -NoProfile -Command "^
     $sc.TargetPath = '%~dp0Black.exe'; ^
     $sc.WorkingDirectory = '%~dp0'; ^
     $sc.IconLocation = '%~dp0icon.ico,0'; ^
-    $sc.Description = 'Black - Edge Light Version Web Browser'; ^
+    $sc.Description = 'Black Browser - Edge Light Version Web Browser'; ^
     $sc.Save();"
 
 echo [OK] Desktop shortcut created!
@@ -41,3 +45,4 @@ echo ========================================================
 echo Setup complete! Launch Black Browser from your Desktop.
 echo ========================================================
 echo.
+pause
