@@ -1,4 +1,4 @@
-# Black Browser
+# Black Browser v8.2
 
 A native, ultra-lightweight Windows web browser styled after Microsoft Edge Light Mode, built with C# (.NET Framework 4.8) and Microsoft WebView2. Three-layer ad blocking, local bookmarks, custom speed dials, and minimal RAM usage — no Electron, no Tauri, no browser engine bloat.
 

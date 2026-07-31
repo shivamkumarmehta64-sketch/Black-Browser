@@ -78,17 +78,17 @@ namespace BlackBrowser
                 string jsAutoSkip = @"
                     setInterval(function() {
                         try {
+                            var skipBtn = document.querySelector('.ytp-ad-skip-button, .ytp-ad-skip-button-modern, .ytp-skip-ad-button, .ytp-ad-skip-button-slot, .ytp-ad-skip-button-container button');
+                            if (skipBtn) {
+                                skipBtn.click();
+                            }
                             var video = document.querySelector('video');
                             if (video) {
-                                var skipBtn = document.querySelector('.ytp-ad-skip-button, .ytp-ad-skip-button-modern, .ytp-skip-ad-button');
-                                if (skipBtn) {
-                                    skipBtn.click();
-                                }
-                                var adShowing = document.querySelector('.ad-showing, .video-ads');
+                                var adShowing = document.querySelector('.ad-showing, .ad-interrupting, .ytp-ad-player-overlay');
                                 if (adShowing) {
                                     video.muted = true;
                                     video.playbackRate = 16.0;
-                                    if (isFinite(video.duration) && video.duration > 0) {
+                                    if (isFinite(video.duration) && video.duration > 0 && video.currentTime < video.duration - 0.5) {
                                         video.currentTime = video.duration - 0.1;
                                     }
                                 }
