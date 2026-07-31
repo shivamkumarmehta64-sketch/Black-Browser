@@ -42,7 +42,7 @@ namespace BlackBrowser
         public BrowserForm()
         {
             logPath = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "debug.log");
-            Log("=== Black Browser starting (Local History & Privacy v5.1) ===");
+            Log("=== Black Browser starting (Home Button Fix v5.2) ===");
 
             this.SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint, true);
             this.DoubleBuffered = true;
@@ -347,6 +347,7 @@ namespace BlackBrowser
             mainMenu.Font = new Font("Segoe UI", 9.5f);
 
             mainMenu.Items.Add("➕ New Tab (Ctrl+T)", null, (s, e) => AddNewTab("New Tab", "about:blank"));
+            mainMenu.Items.Add("🏠 Go to Speed Dial Home", null, (s, e) => NavigateCurrentTab("about:blank"));
             mainMenu.Items.Add("📜 Local History (Ctrl+H)", null, (s, e) => NavigateCurrentTab("black://history"));
             mainMenu.Items.Add("🛒 Chrome Web Store", null, (s, e) => AddNewTab("Chrome Store", "https://chromewebstore.google.com"));
             mainMenu.Items.Add("🧩 Edge Add-ons Store", null, (s, e) => AddNewTab("Edge Add-ons", "https://microsoftedge.microsoft.com/addons"));
@@ -529,7 +530,7 @@ namespace BlackBrowser
                     }
                 };
 
-                if (url == "about:blank" || string.IsNullOrEmpty(url))
+                if (url == "about:blank" || string.IsNullOrEmpty(url) || url == "black://home")
                 {
                     wv.CoreWebView2.NavigateToString(SpeedDialPage.GetHtml(isDarkMode));
                 }
@@ -602,6 +603,14 @@ namespace BlackBrowser
             WebView2 wv = GetCurrentWebView();
             if (wv != null && wv.CoreWebView2 != null)
             {
+                if (string.IsNullOrWhiteSpace(input) || input == "about:blank" || input.Equals("black://home", StringComparison.OrdinalIgnoreCase))
+                {
+                    wv.CoreWebView2.NavigateToString(SpeedDialPage.GetHtml(isDarkMode));
+                    urlBar.Text = "";
+                    if (tabControl.SelectedTab != null) tabControl.SelectedTab.Text = "New Tab";
+                    return;
+                }
+
                 if (input.Equals("black://history", StringComparison.OrdinalIgnoreCase) ||
                     input.Equals("about:history", StringComparison.OrdinalIgnoreCase))
                 {
