@@ -1,10 +1,10 @@
 @echo off
 title Black Browser Setup
 echo ========================================================
-echo             Black Browser - Setup Build
+echo             Black Browser v8.5 - Setup Build
 echo ========================================================
 echo.
-echo [INFO] Compiling from src\ (v8.2 codebase)...
+echo [INFO] Compiling from src\ (v8.5 codebase)...
 echo.
 
 set "CSC=C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe"
@@ -29,15 +29,7 @@ echo [OK] Black.exe compiled successfully!
 echo.
 
 echo [2/2] Creating Desktop shortcut...
-powershell -NoProfile -Command "^
-    $desktop = [Environment]::GetFolderPath('Desktop'); ^
-    $ws = New-Object -ComObject WScript.Shell; ^
-    $sc = $ws.CreateShortcut(\"$desktop\Black Browser.lnk\"); ^
-    $sc.TargetPath = '%~dp0Black.exe'; ^
-    $sc.WorkingDirectory = '%~dp0'; ^
-    $sc.IconLocation = '%~dp0icon.ico,0'; ^
-    $sc.Description = 'Black Browser - Edge Light Version Web Browser'; ^
-    $sc.Save();"
+powershell -NoProfile -Command "$ws = New-Object -ComObject WScript.Shell; $sc = $ws.CreateShortcut([System.IO.Path]::Combine([Environment]::GetFolderPath('Desktop'), 'Black Browser.lnk')); $sc.TargetPath = '%~dp0Black.exe'; $sc.WorkingDirectory = '%~dp0'; $sc.IconLocation = '%~dp0icon.ico,0'; $sc.Description = 'Black Browser v8.5 - Windows 11 Fluent 2 Edition'; $sc.Save()"
 
 echo [OK] Desktop shortcut created!
 echo.
