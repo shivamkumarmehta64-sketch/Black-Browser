@@ -134,11 +134,11 @@ namespace BlackBrowser
             softBanner = new Panel();
             softBanner.Dock = DockStyle.Top;
             softBanner.Height = 24;
-            softBanner.BackColor = Color.FromArgb(0, 103, 192);
+            softBanner.BackColor = Color.FromArgb(123, 97, 255);
 
             softBannerLabel = new Label();
             softBannerLabel.Dock = DockStyle.Fill;
-            softBannerLabel.Text = "✨ Black Browser Active — Windows 11 Fluent 2 & 100% Ad-Free YouTube";
+            softBannerLabel.Text = "✨ Google Gemini Theme Active — 100% Ad-Free YouTube & Zero Trackers";
             softBannerLabel.ForeColor = Color.White;
             softBannerLabel.Font = new Font("Segoe UI Variable Display", 8.5f, FontStyle.Bold);
             softBannerLabel.TextAlign = ContentAlignment.MiddleCenter;
@@ -149,7 +149,7 @@ namespace BlackBrowser
             bannerTimer.Interval = 4000;
             bannerTimer.Tick += (s, e) =>
             {
-                softBannerLabel.Text = "✨ Black Browser Active — Windows 11 Fluent 2 & 100% Ad-Free YouTube";
+                softBannerLabel.Text = "✨ Google Gemini Theme Active — 100% Ad-Free YouTube & Zero Trackers";
                 bannerTimer.Stop();
             };
 
