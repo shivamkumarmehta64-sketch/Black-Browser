@@ -50,16 +50,38 @@ namespace BlackBrowser
         private int totalBlockedAds = 0;
         private string logPath;
         private Stack<Tuple<string, string>> closedTabStack = new Stack<Tuple<string, string>>();
+        private string initialStartupUrl = "black://home";
 
-        public BrowserForm()
+        public BrowserForm(string[] args = null)
         {
             logPath = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "debug.log");
             Log("=== Black Browser starting (Windows 11 Fluent 2 Edition v8.5) ===");
 
+            if (args != null && args.Length > 0)
+            {
+                string firstArg = args[0].Trim();
+                if (firstArg.IndexOf("music.youtube.com", StringComparison.OrdinalIgnoreCase) >= 0 || firstArg.Equals("--ytmusic", StringComparison.OrdinalIgnoreCase))
+                {
+                    initialStartupUrl = "https://music.youtube.com";
+                    this.Text = "🎵 YouTube Music Desktop — Black Browser (Ad-Free)";
+                }
+                else if (firstArg.IndexOf("youtube.com", StringComparison.OrdinalIgnoreCase) >= 0 || firstArg.Equals("--youtube", StringComparison.OrdinalIgnoreCase))
+                {
+                    initialStartupUrl = "https://www.youtube.com";
+                    this.Text = "▶ YouTube Desktop — Black Browser (Ad-Free)";
+                }
+                else if (firstArg.StartsWith("http", StringComparison.OrdinalIgnoreCase) || firstArg.StartsWith("black://", StringComparison.OrdinalIgnoreCase))
+                {
+                    initialStartupUrl = firstArg;
+                }
+            }
+
             this.SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint, true);
             this.DoubleBuffered = true;
 
-            this.Text = "Black Browser";
+            if (string.IsNullOrEmpty(this.Text) || this.Text == "Black Browser")
+                this.Text = "Black Browser";
+
             this.Width = 1280;
             this.Height = 820;
             this.BackColor = Color.FromArgb(243, 243, 243);
@@ -587,6 +609,8 @@ namespace BlackBrowser
             mainMenu.Items.Add("📜 Local History (Ctrl+H)", null, (s, e) => NavigateCurrentTab("black://history"));
             mainMenu.Items.Add("📥 Local Downloads (Ctrl+J)", null, (s, e) => NavigateCurrentTab("black://downloads"));
             mainMenu.Items.Add("🧩 Extensions Manager", null, (s, e) => NavigateCurrentTab("black://extensions"));
+            mainMenu.Items.Add("🎵 YouTube Music Desktop (Ad-Free)", null, (s, e) => AddNewTab("YT Music", "https://music.youtube.com"));
+            mainMenu.Items.Add("▶ YouTube Desktop (Ad-Free)", null, (s, e) => AddNewTab("YouTube", "https://www.youtube.com"));
             mainMenu.Items.Add("🛒 Chrome Web Store", null, (s, e) => AddNewTab("Chrome Store", "https://chromewebstore.google.com"));
             mainMenu.Items.Add("🧩 Edge Add-ons Store", null, (s, e) => AddNewTab("Edge Add-ons", "https://microsoftedge.microsoft.com/addons"));
             mainMenu.Items.Add(new ToolStripSeparator());
@@ -692,8 +716,8 @@ namespace BlackBrowser
                 webViewEnv = await CoreWebView2Environment.CreateAsync(null, userDataFolder, options);
                 Log("Environment created successfully with standard WebView2 environment settings");
 
-                // Launch Home / Speed Dial page in the initial tab
-                AddNewTab("New Tab", "black://home");
+                // Launch Home or initial startup page in the initial tab
+                AddNewTab(initialStartupUrl.Contains("music.youtube.com") ? "YT Music" : (initialStartupUrl.Contains("youtube.com") ? "YouTube" : "New Tab"), initialStartupUrl);
             }
             catch (Exception ex)
             {

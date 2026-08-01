@@ -42,7 +42,7 @@ namespace BlackBrowser
         public static readonly uint WM_SHOW_BLACK_BROWSER = RegisterWindowMessage("WM_SHOW_BLACK_BROWSER_9b2d0d52");
 
         [STAThread]
-        static void Main()
+        static void Main(string[] args)
         {
             Application.ThreadException += (s, e) => LogUnhandledException(e.Exception);
             AppDomain.CurrentDomain.UnhandledException += (s, e) => LogUnhandledException(e.ExceptionObject as Exception);
@@ -80,7 +80,7 @@ namespace BlackBrowser
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new BrowserForm());
+            Application.Run(new BrowserForm(args));
         }
 
         public static void ForceForegroundWindow(IntPtr hWnd)
