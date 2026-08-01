@@ -609,8 +609,6 @@ namespace BlackBrowser
             mainMenu.Items.Add("📜 Local History (Ctrl+H)", null, (s, e) => NavigateCurrentTab("black://history"));
             mainMenu.Items.Add("📥 Local Downloads (Ctrl+J)", null, (s, e) => NavigateCurrentTab("black://downloads"));
             mainMenu.Items.Add("🧩 Extensions Manager", null, (s, e) => NavigateCurrentTab("black://extensions"));
-            mainMenu.Items.Add("🎵 YouTube Music Desktop (Ad-Free)", null, (s, e) => AddNewTab("YT Music", "https://music.youtube.com"));
-            mainMenu.Items.Add("▶ YouTube Desktop (Ad-Free)", null, (s, e) => AddNewTab("YouTube", "https://www.youtube.com"));
             mainMenu.Items.Add("🛒 Chrome Web Store", null, (s, e) => AddNewTab("Chrome Store", "https://chromewebstore.google.com"));
             mainMenu.Items.Add("🧩 Edge Add-ons Store", null, (s, e) => AddNewTab("Edge Add-ons", "https://microsoftedge.microsoft.com/addons"));
             mainMenu.Items.Add(new ToolStripSeparator());
